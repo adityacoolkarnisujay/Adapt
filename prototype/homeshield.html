@@ -1,0 +1,1246 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HomeShield</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sora:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one cinematic "showroom" screen. Wordmark + pill nav + notifications across the top, the home turning on a studio floor in the middle, three glass cards along the bottom. Single steel-navy look by design. */
+:root{
+  color-scheme: dark;
+  --bg:#1b2633; --bg-top:#7d8d9d; --bg-mid:#4b5b6d;
+  --glass:rgba(26,36,49,.58); --glass-2:rgba(255,255,255,.07); --glass-3:rgba(255,255,255,.13);
+  --solid:#18222f; --solid-2:#202c3b; --solid-3:#2a3748;
+  --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.18);
+  --fg:#F1F4F8; --muted:#A9B6C5; --faint:#7d8b9c;
+  --teal:#4FD6C4; --teal-ink:#05231f; --teal-dim:rgba(79,214,196,.15);
+  --amber:#F5BB55; --amber-dim:rgba(245,187,85,.16);
+  --red:#F47168; --red-dim:rgba(244,113,104,.16);
+  --grey:#8a97a8; --grey-dim:rgba(138,151,168,.16);
+  --font-display:'Sora','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --font-body:'Figtree','Segoe UI',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --r-xl:26px; --r-lg:20px; --r-md:14px;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.65);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg);
+  background-image:radial-gradient(120% 85% at 50% 18%, var(--bg-top) 0%, var(--bg-mid) 38%, #2a3746 68%, var(--bg) 100%);
+  background-attachment:fixed;
+  color:var(--fg); font-family:var(--font-body); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:10px}
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ic.sm{width:15px;height:15px}.ic.lg{width:21px;height:21px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:var(--font-mono);font-size:.86em}
+.tnum{font-variant-numeric:tabular-nums}
+.gutter{padding-left:max(24px, env(safe-area-inset-left,0px));padding-right:max(24px, env(safe-area-inset-right,0px))}
+
+/* ---------- header ---------- */
+.hdr{position:absolute;top:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:16px;padding-block:20px 0}
+.logo{font-family:var(--font-display);font-weight:400;font-size:21px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.logo .ic{color:var(--teal)}
+.gw{display:flex;gap:10px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.gw .dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;margin-right:6px;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 25%,transparent)}
+.gw .on{color:var(--teal)}.gw .off{color:var(--red)}
+.gw b{color:var(--fg);font-weight:500}
+.sim{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);border:1px dashed color-mix(in srgb,var(--amber) 60%,transparent);padding:2px 7px;border-radius:999px}
+.pills{display:flex;gap:6px;padding:5px;border-radius:16px;background:rgba(20,29,40,.35);backdrop-filter:blur(14px);border:1px solid var(--line)}
+.pills button{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;height:40px;min-width:44px;padding:0 12px;border:0;border-radius:12px;background:rgba(255,255,255,.04);color:var(--muted);font-size:13.5px;font-weight:600;transition:background .2s,min-width .3s}
+.pills button:hover{color:var(--fg);background:rgba(255,255,255,.09)}
+.pills button .t{display:none}
+.pills button[aria-current="page"]{min-width:118px;background:rgba(255,255,255,.2);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.pills button[aria-current="page"] .t{display:inline}
+.pills .badge{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;font-size:10.5px;line-height:16px;font-weight:700}
+.badge.red{background:var(--red);color:#2a0805}.badge.amber{background:var(--amber);color:#2a1a00}
+.hdr-r{display:flex;justify-content:flex-end;align-items:flex-start;gap:8px;position:relative}
+.sq{display:grid;place-items:center;position:relative;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(20,29,40,.35);backdrop-filter:blur(14px)}
+.sq:hover{border-color:var(--line-2)}
+.sq .badge{position:absolute;top:-4px;right:-4px}
+.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:linear-gradient(140deg,#e7b48e,#9a6b55);color:#2a1a10;border:2px solid rgba(255,255,255,.5)}
+.notes{position:absolute;top:50px;right:0;width:250px;display:flex;flex-direction:column;gap:6px}
+.note{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:9px 11px;border-radius:12px;border:1px solid var(--line);background:rgba(22,31,43,.6);backdrop-filter:blur(14px);font-size:12.5px;line-height:1.35}
+.note:hover{border-color:var(--line-2)}
+.note .ni{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;flex:none;background:var(--glass-2)}
+.note b{display:block;font-weight:600;font-size:12.5px}
+.note small{color:var(--muted)}
+.pop{position:absolute;right:0;top:50px;z-index:40;width:330px;max-height:70vh;overflow:auto;padding:12px;background:var(--solid);border:1px solid var(--line-2);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.pop h3{margin:2px 4px 10px;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between}
+.menu button{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:9px 10px;border:0;background:none;border-radius:10px}
+.menu button:hover,.menu button:focus-visible{background:var(--solid-2)}
+.menu .radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--line-2);margin-top:2px;flex:none}
+.menu button[aria-checked="true"] .radio{border-color:var(--teal);box-shadow:inset 0 0 0 3px var(--solid);background:var(--teal)}
+.menu small{display:block;color:var(--muted);font-size:12.5px}
+
+/* ---------- overview "showroom" ---------- */
+#view-overview{position:relative;height:max(100vh, 800px);overflow:hidden}
+#stage{position:absolute;inset:0}
+#stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:pan-y}
+#stage canvas:active{cursor:grabbing}
+.labels{position:absolute;inset:0;pointer-events:none;z-index:5}
+.nl{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:7px;padding:5px 10px 5px 8px;border-radius:999px;background:rgba(16,24,35,.7);backdrop-filter:blur(8px);border:1px solid var(--line-2);font-size:12px;font-weight:600;white-space:nowrap;will-change:transform;transition:opacity .25s}
+.nl:hover{border-color:#fff}
+.nl .d{width:7px;height:7px;border-radius:50%}
+.nl .s{font-weight:500;color:var(--muted)}
+.nl.dim{opacity:.3}.nl.hide{opacity:0;pointer-events:none}
+.d.teal{background:var(--teal)}.d.red{background:var(--red)}.d.amber{background:var(--amber)}.d.grey{background:var(--grey)}
+.title{position:absolute;left:50%;top:max(96px, 12vh);transform:translateX(-50%);text-align:center;pointer-events:none;z-index:6;width:min(640px,92%)}
+.title .eye{display:flex;justify-content:center;align-items:center;gap:12px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.title .eye i{width:1px;height:13px;background:rgba(255,255,255,.4)}
+.title .eye .ic{width:16px;height:16px}
+.title h1{margin:4px 0 2px;font-family:var(--font-display);font-weight:300;font-size:clamp(30px,3.6vw,46px);letter-spacing:-.02em;text-shadow:0 2px 30px rgba(0,0,0,.25)}
+.title h1 span{font-weight:200;opacity:.85}
+.title p{margin:0;color:rgba(255,255,255,.72);font-size:13.5px}
+.modes{position:absolute;left:max(24px, env(safe-area-inset-left,0px));top:42%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;z-index:6}
+.modes button{display:flex;align-items:center;gap:12px;border:0;background:none;padding:6px 4px;color:rgba(255,255,255,.55);font-size:12.5px;text-align:left}
+.modes .k{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.1);font-size:11px;font-weight:700;color:rgba(255,255,255,.8)}
+.modes button[aria-pressed="true"]{color:#fff}
+.modes button[aria-pressed="true"] .k{background:#fff;color:#1b2633}
+.modes button[aria-pressed="true"] .n{font-family:var(--font-display);font-size:22px;font-weight:300}
+.modes button:hover{color:#fff}
+.modes .hint{font-size:11.5px;color:rgba(255,255,255,.5);max-width:150px;margin:6px 0 0 40px;line-height:1.35}
+.zoomc{position:absolute;right:max(24px, env(safe-area-inset-right,0px));top:42%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:6}
+.rnd{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(20,29,40,.25);backdrop-filter:blur(8px);color:#fff}
+.rnd:hover{border-color:#fff;background:rgba(255,255,255,.1)}
+.orbit{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--cards-h, 220px) + 22px);display:flex;align-items:center;gap:18px;z-index:6;font-family:var(--font-display);font-weight:300;font-size:17px}
+.orbit .lg{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:6px;display:flex;gap:14px;white-space:nowrap;font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,.6)}
+.orbit .lg span{display:flex;gap:6px;align-items:center}
+.orbit .lg i{display:block;width:18px;border-top:2px solid}
+.cards{position:absolute;left:0;right:0;bottom:0;z-index:7;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding-bottom:max(18px, env(safe-area-inset-bottom,0px))}
+.card{position:relative;background:var(--glass);backdrop-filter:blur(20px) saturate(1.2);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px 18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.card-top{display:flex;align-items:center;gap:12px}
+.chipi{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--glass-2);border:1px solid var(--line);flex:none}
+.card-top .tt{min-width:0;flex:1}
+.card-top b{display:block;font-size:14px;font-weight:600}
+.card-top small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arrow{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:1px solid var(--line-2);background:none;flex:none}
+.arrow:hover{border-color:#fff}
+.big{font-family:var(--font-display);font-weight:300;font-size:34px;line-height:1;letter-spacing:-.02em}
+.big small{font-size:15px;color:var(--muted);margin-left:4px}
+.foot{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:10.5px;color:rgba(255,255,255,.35);z-index:7;pointer-events:none}
+.att-h{font-size:16.5px;font-weight:500;line-height:1.35;margin:0;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.meta span{display:flex;gap:5px;align-items:center}
+.seg6{display:flex;gap:4px}
+.seg6 i{flex:1;height:5px;border-radius:3px;background:var(--glass-3)}
+.seg6 i.teal{background:var(--teal)}.seg6 i.amber{background:var(--amber)}.seg6 i.red{background:var(--red)}.seg6 i.grey{background:var(--grey)}
+.devdots{display:flex;gap:6px;flex-wrap:wrap}
+.devdot{position:relative;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--glass-2)}
+.devdot:hover{border-color:var(--line-2)}
+.devdot .d{position:absolute;right:-2px;top:-2px;width:9px;height:9px;border-radius:50%;border:2px solid #1d2836}
+.bars{display:flex;align-items:flex-end;gap:5px;height:56px}
+.bars i{flex:1;border-radius:3px 3px 1px 1px;background:rgba(255,255,255,.75);min-height:3px;transition:height .4s}
+.bars.off i{background:rgba(255,255,255,.18)}
+.bars.deg i{background:var(--amber)}
+.bars-x{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint)}
+
+/* ---------- generic ---------- */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip.teal{background:var(--teal-dim);color:var(--teal)}.chip.amber{background:var(--amber-dim);color:var(--amber)}.chip.red{background:var(--red-dim);color:var(--red)}.chip.grey{background:var(--grey-dim);color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 15px;border-radius:12px;border:1px solid var(--line-2);background:var(--glass-2);font-weight:600;font-size:14px}
+.btn:hover{border-color:rgba(255,255,255,.4)}
+.btn.primary{background:#fff;color:#16202c;border-color:transparent}
+.btn.primary:hover{background:#e6ecf2}
+.btn.danger{background:var(--red);color:#2b0704;border-color:transparent}
+.btn.ghost{background:none}
+.btn.small{min-height:32px;padding:5px 11px;font-size:13px;border-radius:10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{border:0;background:none;padding:0;color:var(--teal);font-weight:600;font-size:13px;display:inline-flex;gap:4px;align-items:center}
+.link:hover{text-decoration:underline}
+.link[disabled]{opacity:.45;cursor:not-allowed;text-decoration:none}
+.muted{color:var(--muted)}.faint{color:var(--faint)}
+.st{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.st.red{color:var(--red)}.st.teal{color:var(--teal)}.st.amber{color:var(--amber)}.st.grey{color:var(--muted)}
+.switch{position:relative;width:44px;height:26px;border-radius:13px;border:1px solid var(--line-2);background:rgba(255,255,255,.1);flex:none;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#cfd8e2;transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--teal);border-color:transparent}
+.switch[aria-checked="true"]::after{transform:translateX(18px);background:var(--teal-ink)}
+.switch[disabled]{opacity:.45;cursor:not-allowed}
+.spin{width:15px;height:15px;border-radius:50%;border:2px solid var(--line-2);border-top-color:var(--teal);animation:rot .8s linear infinite;flex:none}
+@keyframes rot{to{transform:rotate(360deg)}}
+.skel{border-radius:7px;background:linear-gradient(90deg,var(--glass-2),var(--glass-3),var(--glass-2));background-size:200% 100%;animation:sh 1.3s linear infinite;height:13px}
+@keyframes sh{to{background-position:-200% 0}}
+.demo-label{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--amber)}
+.empty{display:grid;place-items:center;text-align:center;gap:8px;padding:28px 12px;color:var(--muted)}
+.empty .ic{width:28px;height:28px;color:var(--faint)}
+.empty strong{color:var(--fg);font-weight:600}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.feed li{display:grid;grid-template-columns:44px 10px minmax(0,1fr);gap:8px;font-size:13.5px;align-items:start}
+.feed time{color:var(--faint);font-variant-numeric:tabular-nums;font-size:12.5px;padding-top:1px}
+.feed .m{width:8px;height:8px;border-radius:50%;margin-top:6px}
+.m.red{background:var(--red)}.m.teal{background:var(--teal)}.m.amber{background:var(--amber)}.m.grey{background:var(--grey)}
+
+/* ---------- inner pages ---------- */
+.page{padding-top:118px;padding-bottom:40px;min-height:100vh}
+.page-h{font-family:var(--font-display);font-weight:300;font-size:34px;margin:0 0 18px;letter-spacing:-.02em}
+.panel{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;min-width:0}
+.panel-head{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
+.panel-head h2{margin:0;font-size:15px;font-weight:600}
+.rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 8px;border:0;background:none;border-radius:12px;text-align:left}
+button.row:hover{background:rgba(255,255,255,.05)}
+button.row[aria-current="true"]{background:rgba(255,255,255,.08)}
+.row .av{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--glass-2);border:1px solid var(--line);flex:none}
+.row .tx{min-width:0;flex:1}
+.row .tx b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .tx small{display:block;color:var(--muted);font-size:12.5px}
+.dev-grid{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:18px;align-items:start}
+.search{display:flex;align-items:center;gap:8px;padding:0 12px;height:44px;border-radius:12px;border:1px solid var(--line-2);background:rgba(0,0,0,.18)}
+.search input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:14.5px}
+.search:focus-within{border-color:var(--teal)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.fchip{padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:none;font-size:13px;font-weight:600;color:var(--muted)}
+.fchip[aria-pressed="true"]{background:#fff;color:#16202c;border-color:transparent}
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid var(--line)}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:rgba(255,255,255,.16);color:#fff}
+.map-wrap{overflow-x:auto}
+.map{display:block;width:100%;min-width:620px;height:auto}
+.map .node,.map .edge{cursor:pointer}
+.map .node:focus,.map .edge:focus{outline:none}
+.map .node:focus-visible .ring,.map .node.sel .ring{stroke:#fff;stroke-width:2.6}
+.map .edge:focus-visible .vis,.map .edge.sel .vis{stroke-width:4}
+.map text{font-family:var(--font-body)}
+.map .dim{opacity:.22}
+.map-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:10px}
+.map-legend span{display:flex;align-items:center;gap:8px}
+.map-legend i{display:block;width:28px;border-top:2px solid}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:rgba(255,255,255,.04)}
+.tbl-wrap{overflow-x:auto}
+.inc-list{display:flex;flex-direction:column;gap:10px}
+.inc{display:grid;grid-template-columns:4px 40px minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;text-align:left;padding:14px 16px 14px 0;border-radius:var(--r-md);border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(20px);overflow:hidden}
+.inc:hover{border-color:var(--line-2)}
+.inc .stripe{align-self:stretch;margin:-14px 0}
+.stripe.red{background:var(--red)}.stripe.teal{background:var(--teal)}.stripe.grey{background:var(--grey)}
+.inc b{display:block;font-weight:600}
+.inc small{color:var(--muted)}
+.set-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
+.set-row:first-of-type{border-top:0}
+.set-row .l{font-weight:500}
+.set-row small{display:block;color:var(--muted);font-size:13px}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--teal);background:var(--teal-dim)}
+.opt input{accent-color:var(--teal);margin-top:4px}
+.opt small{display:block;color:var(--muted)}
+.result{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px 14px;border-radius:12px;font-size:14px}
+.result.ok{background:var(--teal-dim)}.result.err{background:var(--red-dim)}
+.errbox{border:1px solid color-mix(in srgb,var(--red) 45%,var(--line));background:var(--red-dim);border-radius:var(--r-md);padding:12px 14px;font-size:14px;display:flex;gap:10px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:0;font-size:14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;overflow-wrap:anywhere}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,10,18,.5);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:51;width:min(480px,100%);display:flex;flex-direction:column;background:var(--solid);border-left:1px solid var(--line-2);box-shadow:-30px 0 60px -30px rgba(0,0,0,.7);transform:translateX(102%);transition:transform .32s cubic-bezier(.2,.8,.2,1);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.drawer.on{transform:none}
+.dr-head{display:flex;gap:12px;align-items:flex-start;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+.dr-head h2{margin:2px 0 0;font-family:var(--font-display);font-weight:300;font-size:21px;line-height:1.3;text-wrap:balance}
+.dr-head h2:focus{outline:none}
+.dr-head .x{margin-left:auto;flex:none}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dr-body{overflow-y:auto;padding:18px 22px 28px;display:flex;flex-direction:column;gap:22px;overscroll-behavior:contain}
+.dr-body h3{margin:0 0 10px;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dr-body p{margin:0}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.verdict div{padding:12px;border-radius:12px;border:1px solid var(--line)}
+.verdict b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.timeline li:first-child{border-top:0}
+.timeline time{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);padding-top:2px}
+.reco{border:1px solid color-mix(in srgb,var(--teal) 40%,var(--line));border-radius:var(--r-md);padding:16px;background:linear-gradient(180deg,var(--teal-dim),transparent)}
+.reco h4{margin:0 0 6px;font-size:16px}
+.reco .btn.primary{background:var(--teal);color:var(--teal-ink)}
+.effects{list-style:none;margin:12px 0 16px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.effects li{display:flex;gap:10px;align-items:flex-start}
+.effects .ic{margin-top:2px}
+.confirm{border:1px solid color-mix(in srgb,var(--red) 45%,var(--line));background:var(--red-dim);border-radius:var(--r-md);padding:16px;margin-top:12px}
+.confirm h4{margin:0 0 6px}
+.warnbox{border:1px solid color-mix(in srgb,var(--amber) 45%,var(--line));background:var(--amber-dim);border-radius:var(--r-md);padding:14px;font-size:14px}
+.checks{list-style:none;margin:10px 0;padding:0}
+.checks li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.checks li:first-child{border-top:0}
+.checks small{display:block;color:var(--muted);font-size:13px}
+.applied{border:1px solid var(--line-2);border-radius:var(--r-md);padding:16px;background:var(--solid-2)}
+.applied:focus{outline:none}
+details{border:1px solid var(--line);border-radius:12px;padding:0 14px}
+details summary{cursor:pointer;padding:12px 0;font-weight:600;font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details[open] summary .ic{transform:rotate(180deg)}
+details .inner{padding-bottom:14px}
+.perm{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.perm input{accent-color:var(--teal);width:18px;height:18px;margin-top:2px;flex:none}
+.perm b{font-weight:600;display:block}
+.perm small{display:block;color:var(--muted);font-size:13px}
+.perm .tag{margin-left:auto}
+.perm-list{display:flex;flex-direction:column;gap:8px}
+.connlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.connlist button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:none;font-size:14px}
+.connlist button:hover{border-color:var(--line-2)}
+.connlist .tx{flex:1;min-width:0}
+.connlist small{display:block;color:var(--muted);font-size:12.5px}
+.range{width:100%;accent-color:var(--teal)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{padding:12px;border-radius:12px;background:var(--solid-2);border:1px solid var(--line)}
+.metric b{display:block;font-family:var(--font-display);font-weight:300;font-size:24px}
+.metric small{color:var(--muted);font-size:12.5px}
+.flow{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:14px;border-top:1px solid var(--line)}
+.flow:first-child{border-top:0}
+.flow input{accent-color:var(--teal);width:17px;height:17px}
+.toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(520px,calc(100% - 32px))}
+.toast{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;background:var(--solid-3);border:1px solid var(--line-2);box-shadow:var(--shadow);font-size:14px;animation:tin .25s ease}
+.toast .ic{color:var(--teal)}.toast .grow{flex:1}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .cards{grid-template-columns:1fr 1fr}
+  .cards .card:first-child{grid-column:1/-1}
+  #view-overview{height:max(100vh, 940px)}
+  .notes{display:none}
+}
+@media (max-width:900px){.dev-grid,.set-grid{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .hdr{grid-template-columns:1fr auto}
+  .pills{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:45;border-radius:20px 20px 0 0;justify-content:space-around;padding:8px max(12px, env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(12px, env(safe-area-inset-left,0px));background:rgba(18,26,37,.92)}
+  .pills button{flex:1;flex-direction:column;height:auto;padding:6px 2px;gap:2px;font-size:11px;min-width:0!important}
+  .pills button .t{display:inline}
+  #view-overview{height:auto;overflow:visible;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  #stage{position:relative;height:560px}
+  .title{top:150px}
+  .title h1{font-size:30px}
+  .modes{top:auto;bottom:auto;left:0;right:0;transform:none;position:relative;flex-direction:row;overflow-x:auto;margin-top:-56px;padding:0 16px}
+  .modes button{flex:none}
+  .modes button[aria-pressed="true"] .n{font-size:16px}
+  .modes .hint{display:none}
+  .zoomc{top:260px;transform:none;right:12px}
+  .orbit{position:relative;left:auto;transform:none;bottom:auto;justify-content:center;margin:14px 0 30px}
+  .cards{position:relative;grid-template-columns:1fr;margin-top:8px}
+  .foot{position:relative;margin-top:14px}
+  .page{padding-top:100px;padding-bottom:110px}
+  .verdict,.metrics{grid-template-columns:1fr}
+  .drawer{top:auto;height:92vh;width:100%;border-left:0;border-top:1px solid var(--line-2);border-radius:22px 22px 0 0;transform:translateY(102%)}
+  .drawer.on{transform:none}
+  .toasts{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.rm *,.rm *::before,.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8h3l2-2.5h8L18 8h3v11H3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-motion" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-hub" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="9" rx="2.5"/><path d="M8.5 7a5 5 0 0 1 7 0M6 4.5a8.5 8.5 0 0 1 12 0"/><circle cx="12" cy="14.5" r="1.2"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="10" rx="1.5"/><path d="M2.5 19h19"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .4-8A6 6 0 0 0 6.3 9.6 4.3 4.3 0 0 0 7 18z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.3-4.4"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-net" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M7.4 8l3.6 7.8M16.6 8L13 15.8M8.4 6h7.2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.3v.2"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-block" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 18L18 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M10 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4.5h-4.5"/></symbol>
+  <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12c2.5-5 4.5-5 7 0s4.5 5 7 0 4.5-5 6 0"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.2"/></symbol>
+  <symbol id="i-offline" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M8.5 16.5a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 5-2.6M14.5 10a10 10 0 0 1 4.5 2.5M12 20v.2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <header class="hdr gutter">
+    <div>
+      <div class="logo"><svg class="ic lg" aria-hidden="true"><use href="#i-shield"/></svg>HomeShield</div>
+      <div class="gw" id="gw"></div>
+    </div>
+    <nav class="pills" id="nav" aria-label="Main">
+      <button data-act="nav" data-id="overview" aria-label="Overview" title="Overview"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><span class="t">Overview</span></button>
+      <button data-act="nav" data-id="devices" aria-label="Devices &amp; Connections" title="Devices &amp; Connections"><svg class="ic" aria-hidden="true"><use href="#i-net"/></svg><span class="t">Devices</span><span class="badge amber" id="nb-dev" hidden></span></button>
+      <button data-act="nav" data-id="incidents" aria-label="Incidents" title="Incidents"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span class="t">Incidents</span><span class="badge red" id="nb-inc" hidden></span></button>
+      <button data-act="nav" data-id="settings" aria-label="Settings" title="Settings"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span class="t">Settings</span></button>
+    </nav>
+    <div class="hdr-r">
+      <button class="sq" id="demo-btn" data-act="demo-menu" aria-haspopup="true" aria-expanded="false" aria-label="Demo scenarios" title="Demo scenarios"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg></button>
+      <button class="sq" id="bell-btn" data-act="bell" aria-haspopup="true" aria-expanded="false" aria-label="Recent activity" title="Recent activity"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><span class="badge red" id="nb-bell" hidden></span></button>
+      <span class="avatar" aria-hidden="true">D</span>
+      <div class="notes" id="notes"></div>
+      <div class="pop menu" id="demo-menu" role="menu" hidden>
+        <h3>Demo scenarios</h3>
+        <button role="menuitemradio" data-act="scenario" data-id="normal"><span class="radio"></span><span>Normal<small>Gateway online, one active incident</small></span></button>
+        <button role="menuitemradio" data-act="scenario" data-id="offline"><span class="radio"></span><span>Gateway offline<small>Monitoring and enforcement unavailable</small></span></button>
+        <button role="menuitemradio" data-act="scenario" data-id="degraded"><span class="radio"></span><span>Privacy degraded<small>Relay slow, traffic shaping partly paused</small></span></button>
+      </div>
+      <div class="pop" id="bell-pop" hidden><h3><span>Recent activity</span><span class="demo-label">Simulated</span></h3><ul class="feed" id="feed"></ul></div>
+    </div>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section class="view" id="view-overview" aria-label="Overview">
+    <div id="stage"></div>
+    <div class="labels" id="labels"></div>
+    <div class="title">
+      <div class="eye"><span>Gateway HS-1</span><i></i><span id="t-state">Online</span></div>
+      <h1><span>12</span> Maple Court</h1>
+      <p id="t-sub"></p>
+    </div>
+    <div class="modes" id="modes" role="group" aria-label="House view"></div>
+    <div class="zoomc">
+      <button class="rnd" data-act="zoom" data-id="in" aria-label="Zoom in"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+      <button class="rnd" data-act="zoom" data-id="out" aria-label="Zoom out"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+      <button class="rnd" data-act="zoom" data-id="reset" aria-label="Reset view"><svg class="ic" aria-hidden="true"><use href="#i-rotate"/></svg></button>
+    </div>
+    <div class="orbit" id="orbit">
+      <button class="rnd" data-act="spin" data-id="-1" aria-label="Turn house left"><svg class="ic" aria-hidden="true"><use href="#i-chev-l"/></svg></button>
+      <span>360°</span>
+      <button class="rnd" data-act="spin" data-id="1" aria-label="Turn house right"><svg class="ic" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
+      <div class="lg" aria-hidden="true"><span><i style="border-color:var(--teal)"></i>Allowed</span><span><i style="border-color:var(--red);border-top-style:dashed"></i>Blocked</span><span><i style="border-color:var(--amber);border-top-style:dotted;border-top-width:3px"></i>Pending</span></div>
+    </div>
+    <div class="cards gutter" id="cards">
+      <section class="card" id="c-att" aria-live="polite"></section>
+      <section class="card" id="c-dev"></section>
+      <section class="card" id="c-priv"></section>
+    </div>
+    <div class="foot">HomeShield prototype · simulated data · not connected to a real network</div>
+  </section>
+
+  <!-- DEVICES -->
+  <section class="view page gutter" id="view-devices" hidden>
+    <h1 class="page-h">Devices &amp; Connections</h1>
+    <div class="dev-grid">
+      <section class="panel">
+        <label class="search" for="dev-search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><span class="sr">Search devices</span><input id="dev-search" type="search" placeholder="Search by name, room or type" autocomplete="off"></label>
+        <div class="chips" role="group" aria-label="Filter devices" id="dev-filters"></div>
+        <ul class="rows" id="dev-list"></ul>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Communication map</h2>
+          <div class="seg" role="group" aria-label="Map or list"><button data-act="mapmode" data-id="map" aria-pressed="true">Map</button><button data-act="mapmode" data-id="list" aria-pressed="false">List</button></div>
+        </div>
+        <div id="map-area"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- INCIDENTS -->
+  <section class="view page gutter" id="view-incidents" hidden>
+    <h1 class="page-h">Incidents</h1>
+    <div class="chips" role="group" aria-label="Filter incidents" id="inc-filters" style="margin-top:0"></div>
+    <div class="inc-list" id="inc-list"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view page gutter" id="view-settings" hidden>
+    <h1 class="page-h">Settings</h1>
+    <div class="set-grid" id="settings"></div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" data-act="close"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title" hidden></aside>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ic=(n,c='')=>`<svg class="ic ${c}" aria-hidden="true" focusable="false"><use href="#i-${n}"></use></svg>`;
+const KIND={camera:'camera',motion:'motion',bulb:'bulb',hub:'hub',laptop:'laptop',plug:'plug',cloud:'cloud'};
+const sysReduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function initial(){
+  return {
+    scenario:'normal', view:'overview', mode:'exterior', search:'', filter:'all', mapMode:'map', incFilter:'all',
+    loading:true, clock:21*60+52, sel:null,
+    devices:[
+      {id:'cam',name:'Living Room Camera',kind:'camera',room:'Living room',model:'Indoor camera · 2K',ip:'192.168.1.42',mac:'2C:AA:8E:4F:19:07',fw:'4.36.11.8391',status:'managed',identity:'Verified',idNote:'Manufacturer certificate checked at setup',since:'12 Mar 2026'},
+      {id:'motion',name:'Hallway Motion Sensor',kind:'motion',room:'Hallway',model:'Zigbee motion sensor',ip:'Zigbee, through Home Hub',mac:'00:15:8D:00:09:3A:22:71',fw:'1.0.24',status:'managed',identity:'Verified',idNote:'Paired through Home Hub',since:'12 Mar 2026'},
+      {id:'light',name:'Living Room Light',kind:'bulb',room:'Living room',model:'Zigbee color bulb',ip:'Zigbee, through Home Hub',mac:'00:17:88:01:0B:6E:44:5C',fw:'1.104.2',status:'managed',identity:'Verified',idNote:'Paired through Home Hub',since:'14 Mar 2026'},
+      {id:'hub',name:'Home Hub',kind:'hub',room:'Hallway',model:'Smart home hub',ip:'192.168.1.10',mac:'B8:27:EB:61:0D:9F',fw:'2026.10.1',status:'managed',identity:'Verified',idNote:'Manufacturer certificate checked at setup',since:'12 Mar 2026'},
+      {id:'laptop',name:'Personal Laptop',kind:'laptop',room:'Study',model:'Laptop',ip:'192.168.1.23',mac:'F4:D4:88:2A:7C:10',fw:'Not applicable',status:'managed',identity:'Verified',idNote:'Signed in to your HomeShield account',since:'12 Mar 2026'},
+      {id:'plug',name:'New Smart Plug',kind:'plug',room:'Study',model:'Wi-Fi smart plug',ip:'192.168.1.57',mac:'D8:1F:12:6B:A4:03',fw:'1.3.2',status:'pending',identity:'Fingerprint match',idNote:'Network behavior matches a Wi-Fi smart plug. No manufacturer certificate.',since:'Today, 21:31'}
+    ],
+    conns:[
+      {id:'c1',from:'cam',to:'hub',status:'allowed',source:'approved',purpose:'Live view and motion clips',short:'Live view',proto:'RTSP · TCP 554',seen:'Continuous while viewing · last 21:40'},
+      {id:'c2',from:'cam',to:'net',status:'allowed',source:'approved',purpose:'Vendor remote viewing',short:'Remote viewing',proto:'HTTPS · TCP 443 · relay.lumacam.com',seen:'Last 21:44'},
+      {id:'c3',from:'motion',to:'hub',status:'allowed',source:'approved',purpose:'Motion events',short:'Motion events',proto:'Zigbee',seen:'Last 21:12'},
+      {id:'c4',from:'hub',to:'light',status:'allowed',source:'approved',purpose:'Automation: motion turns the light on',short:'Automation',proto:'Zigbee',seen:'Last 21:12'},
+      {id:'c5',from:'laptop',to:'hub',status:'allowed',source:'approved',purpose:'Home Hub app and camera live view',short:'Hub app',proto:'HTTPS · TCP 8443',seen:'Last 19:40'},
+      {id:'c6',from:'laptop',to:'net',status:'allowed',source:'approved',purpose:'Web browsing and updates',short:'Internet',proto:'Any',seen:'Active now'},
+      {id:'c7',from:'hub',to:'net',status:'allowed',source:'approved',purpose:'Hub cloud sync and updates',short:'Cloud sync',proto:'HTTPS · TCP 443',seen:'Last 20:58'},
+      {id:'c8',from:'cam',to:'laptop',status:'blocked',source:'hold',purpose:'File sharing (SMB)',short:'File sharing',proto:'SMB · TCP 445',seen:'14 attempts, 21:47:03 to 21:47:09'},
+      {id:'c9',from:'plug',to:'hub',status:'pending',source:'request',purpose:'Local on/off control',short:'Local control',proto:'TCP 6668',seen:'Requested 21:31'},
+      {id:'c10',from:'plug',to:'net',status:'pending',source:'request',purpose:'Energy reports and firmware updates',short:'Vendor cloud',proto:'MQTT over TLS · cloud.voltaplug.com',seen:'Requested 21:31'},
+      {id:'c11',from:'plug',to:'laptop',status:'pending',source:'request',purpose:'Direct connection to Personal Laptop',short:'To laptop',proto:'TCP 6668',seen:'Requested 21:32'}
+    ],
+    incidents:[
+      {id:'INC-1042',title:'Living Room Camera attempted to connect to Personal Laptop.',device:'cam',dest:'laptop',when:'Today, 21:47',status:'active'},
+      {id:'INC-1031',title:'Home Hub downloaded an update from an unrecognized server.',device:'hub',when:'18 Oct, 09:14',status:'resolved',resolution:'The server was the vendor\'s new update mirror. You approved it, and the update installed normally.'},
+      {id:'INC-1027',title:'Hallway Motion Sensor stopped reporting for 14 minutes.',device:'motion',when:'11 Oct, 02:03',status:'resolved',resolution:'The battery was low. The sensor reported again after the battery was replaced.'}
+    ],
+    activity:[
+      {t:'21:47',tone:'red',text:'Living Room Camera tried to reach Personal Laptop 14 times. Blocked by your policy.',dev:['cam','laptop'],open:['incident','INC-1042']},
+      {t:'21:31',tone:'amber',text:'New Smart Plug joined Wi-Fi and is waiting for your approval.',dev:['plug'],open:['device','plug']},
+      {t:'21:12',tone:'teal',text:'Hallway motion turned on Living Room Light.',dev:['motion','light','hub']},
+      {t:'20:58',tone:'grey',text:'Home Hub checked for updates. It\'s up to date.',dev:['hub']},
+      {t:'19:40',tone:'grey',text:'Personal Laptop opened camera live view through Home Hub.',dev:['laptop','cam','hub']}
+    ],
+    privacy:{enabled:false,budget:150,flows:{cam:true,motion:true,light:true,hub:true}},
+    change:null, isolateAsk:null, applyErr:null,
+    perms:{hub:true,cloud:true,laptop:false,discovery:false}, confirmBroad:false,
+    drawer:null,
+    settings:{notifyInc:true,notifyNew:true,weekly:false,newPolicy:'hold',reduce:false},
+    test:null
+  };
+}
+let S=initial();
+
+const FLOWS=[
+  {key:'cam',label:'Camera event uploads',mb:60},
+  {key:'motion',label:'Motion sensor reports (via hub)',mb:20},
+  {key:'light',label:'Light state changes (via hub)',mb:10},
+  {key:'hub',label:'Home Hub status sync',mb:30}
+];
+const MODES=[['exterior','E','Exterior'],['interior','I','Interior'],['network','N','Network'],['threats','T','Threats']];
+const MODE_HINT={exterior:'Devices glow through the walls. Drag to turn the house.',interior:'Roof lifted so you can see each room.',network:'Every connection and where it goes.',threats:'Only blocked and pending connections.'};
+
+/* ---------- helpers ---------- */
+const dev=id=>S.devices.find(d=>d.id===id);
+const conn=id=>S.conns.find(c=>c.id===id);
+const inc=id=>S.incidents.find(i=>i.id===id);
+const nameOf=id=>id==='net'?'Internet':dev(id).name;
+const connsOf=id=>S.conns.filter(c=>c.from===id||c.to===id);
+const offline=()=>S.scenario==='offline';
+const reduced=()=>sysReduce||S.settings.reduce;
+function tick(){S.clock+=1;const h=Math.floor(S.clock/60)%24,m=S.clock%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+function log(tone,text,devs,open){S.activity.unshift({t:tick(),tone,text,dev:devs||[],open})}
+function counts(){return {disc:S.devices.length,managed:S.devices.filter(d=>d.status==='managed').length,pending:S.devices.filter(d=>d.status==='pending').length,active:S.incidents.filter(i=>i.status==='active').length}}
+const connTone=c=>c.status==='allowed'?'teal':c.status==='blocked'?'red':'amber';
+const connIcon=c=>c.status==='allowed'?'check':c.status==='blocked'?'block':'clock';
+const connWord=c=>c.status==='allowed'?'Allowed':c.status==='blocked'?'Blocked':'Waiting for approval';
+function ruleText(c){return ({approved:'Approved by you',hold:'Blocked by your policy. Waiting for your decision.',rule:'Blocked permanently by rule HS-R17',isolate:'Blocked while the device is isolated',user:'Blocked by you',onboarding:'Not granted during setup',request:'Requested by the device. Not approved yet.'})[c.source]||''}
+function devState(d){
+  if(offline()) return {tone:'grey',text:'No data'};
+  if(d.isolated) return {tone:'red',text:'Isolated'};
+  if(d.status==='pending') return {tone:'amber',text:'Awaiting approval'};
+  if(S.incidents.find(i=>i.device===d.id&&i.status==='active')) return {tone:'red',text:'Incident'};
+  return {tone:'teal',text:'Managed'};
+}
+function privacyState(){
+  const P=S.privacy;const need=FLOWS.filter(f=>P.flows[f.key]).reduce((a,f)=>a+f.mb,0);
+  if(!P.enabled) return {key:'inactive',label:'Off',tone:'grey',need};
+  if(offline()) return {key:'unavailable',label:'Unavailable while the gateway is offline',tone:'grey',need};
+  if(need===0) return {key:'inactive',label:'No traffic selected',tone:'grey',need};
+  if(S.scenario==='degraded') return {key:'degraded',label:'Traffic shaping degraded',tone:'amber',need,why:'The relay is responding slowly. Shaping for camera event uploads is paused until it recovers.'};
+  if(P.budget<need) return {key:'degraded',label:'Traffic shaping degraded',tone:'amber',need,why:`Your budget covers ${Math.round(P.budget/need*100)}% of the selected traffic. Raise it to ${need} MB/day to cover everything.`};
+  return {key:'active',label:'Traffic shaping active',tone:'teal',need};
+}
+
+/* ---------- chrome ---------- */
+function renderChrome(){
+  const c=counts();
+  $('#gw').innerHTML=offline()?`<span class="off"><span class="dot"></span><b>Gateway offline</b></span><span>Monitoring unavailable</span><span class="sim">Simulated</span>`
+    :`<span class="on"><span class="dot"></span><b>Gateway online</b></span><span class="tnum">Monitoring ${c.managed} of ${c.disc} devices</span><span class="sim">Simulated</span>`;
+  const nd=$('#nb-dev'),ni=$('#nb-inc'),nb=$('#nb-bell');
+  nd.hidden=!c.pending;nd.textContent=c.pending;
+  ni.hidden=!c.active;ni.textContent=c.active;
+  const att=c.active+c.pending;nb.hidden=!att;nb.textContent=att;
+  $$('#nav button').forEach(b=>{if(b.dataset.id===S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  $$('#demo-menu button').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.id===S.scenario)));
+  ['overview','devices','incidents','settings'].forEach(v=>$('#view-'+v).hidden=v!==S.view);
+  // notes (top-right, like the reference)
+  const notes=S.view==='overview'&&!S.loading?S.activity.slice(0,2):[];
+  $('#notes').innerHTML=notes.map((a,i)=>`<button class="note" ${a.open?`data-act="open-${a.open[0]}" data-id="${a.open[1]}"`:'data-act="bell"'}><span class="ni" style="color:var(--${a.tone==='grey'?'muted':a.tone})">${ic(a.tone==='red'?'alert':a.tone==='amber'?'clock':'check','sm')}</span><span><b>${esc(a.text.split('. ')[0].replace(/\.$/,''))}</b><small>Today, ${a.t}</small></span></button>`).join('');
+  $('#feed').innerHTML=S.activity.slice(0,12).map(a=>`<li><time>${a.t}</time><span class="m ${a.tone}"></span><span>${esc(a.text)}</span></li>`).join('');
+}
+
+/* ---------- overview ---------- */
+function renderOverview(){
+  const c=counts();
+  $('#t-state').innerHTML=offline()?'<span style="color:var(--red)">Offline</span>':'Online';
+  $('#t-sub').textContent=`${c.disc} devices discovered · ${c.managed} managed · ${c.pending?c.pending+' awaiting approval':'none waiting'}`;
+  $('#modes').innerHTML=MODES.map(([k,key,l])=>`<button data-act="mode" data-id="${k}" aria-pressed="${S.mode===k}"><span class="k">${key}</span><span class="n">${l}</span></button>`).join('')+`<p class="hint">${MODE_HINT[S.mode]}</p>`;
+
+  // card 1: attention
+  const A=$('#c-att');const I=inc('INC-1042');const plug=dev('plug');
+  const top=(chip,tone,title,sub,act,id,label)=>`<div class="card-top"><span class="chipi" style="color:var(--${tone})">${ic(chip)}</span><span class="tt"><b>${title}</b><small>${sub}</small></span>${act?`<button class="arrow" data-act="${act}" ${id?`data-id="${id}"`:''} aria-label="${label}">${ic('arrow','sm')}</button>`:''}</div>`;
+  if(S.loading){A.innerHTML=top('alert','muted','Needs attention','Connecting to gateway HS-1…')+`<div style="display:flex;gap:10px;align-items:center"><span class="spin"></span><span class="muted">Loading the latest activity</span></div><div class="skel" style="width:85%"></div><div class="skel" style="width:60%"></div>`}
+  else if(offline()){
+    A.innerHTML=top('offline','amber','Needs attention','Monitoring unavailable')+`<p class="att-h">HomeShield can't see new activity while gateway HS-1 is offline.</p><p class="meta" style="margin:0">This doesn't mean your home is safe or unsafe. Check that the gateway has power and is plugged into your router.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary small" data-act="nav" data-id="settings">Test gateway connection</button>${I.status==='active'?'<button class="btn small" data-act="open-incident" data-id="INC-1042">Last known incident</button>':''}</div>`;
+  } else if(I.status==='active'){
+    A.innerHTML=top('alert','red','Needs attention','INC-1042 · 1 active incident','open-incident','INC-1042','Open incident')+
+      `<p class="att-h">${esc(I.title)}</p>
+       <div class="meta"><span>${ic('laptop','sm')}Personal Laptop · 192.168.1.23</span><span>${ic('clock','sm')}Today, 21:47</span></div>
+       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between"><span class="chip red">${ic('block','sm')}Connection blocked by your policy</span><button class="btn primary small" data-act="open-incident" data-id="INC-1042">Review incident${ic('chev-r','sm')}</button></div>`;
+  } else {
+    const iso=S.change&&S.change.kind==='isolate';
+    A.innerHTML=top('shield','teal','Needs attention',I.status==='contained'?'INC-1042 contained':'All clear',I.status==='contained'?'open-incident':null,'INC-1042','Open incident')+
+      `<div class="big" style="font-size:28px">No incidents detected</div><p class="meta" style="margin:0">${I.status==='contained'?(iso?'Living Room Camera is isolated while you investigate.':'Camera-to-laptop connection stays blocked by rule HS-R17.'):'HomeShield will show anything that needs you here.'} Monitoring ${c.managed} of ${c.disc} devices.</p>`+
+      (plug.status==='pending'?`<button class="link" data-act="open-device" data-id="plug">${ic('clock','sm')}New Smart Plug is waiting for approval</button>`:'');
+  }
+  if(!S.loading&&!offline()&&I.status==='active'&&plug.status==='pending'){A.insertAdjacentHTML('beforeend',`<button class="link" style="color:var(--amber)" data-act="open-device" data-id="plug">${ic('clock','sm')}Also: New Smart Plug is waiting for approval</button>`)}
+
+  // card 2: devices
+  const D=$('#c-dev');const pct=Math.round(c.managed/c.disc*100);
+  const ringC=2*Math.PI*30;
+  D.innerHTML=top('net','fg','Devices','Discovered on your network','nav','devices','Open Devices & Connections')+
+    `<div style="display:flex;gap:14px;align-items:center;justify-content:space-between">
+      <div style="min-width:0;flex:1"><div class="big tnum">${S.loading?'–':c.managed}<small>/ ${c.disc} managed</small></div>
+        <div class="seg6" style="margin-top:12px" aria-hidden="true">${S.devices.map(d=>`<i class="${S.loading?'':devState(d).tone}"></i>`).join('')}</div></div>
+      <svg width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="${offline()?'Monitoring unavailable':`Monitoring ${c.managed} of ${c.disc} devices`}"><circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6"/><circle cx="38" cy="38" r="30" fill="none" stroke="${offline()?'var(--grey)':'var(--teal)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${offline()?0:ringC*pct/100} ${ringC}" transform="rotate(-90 38 38)"/><text x="38" y="37" text-anchor="middle" font-size="14" font-weight="600" fill="#fff" font-family="Figtree">${offline()?'—':pct+'%'}</text><text x="38" y="51" text-anchor="middle" font-size="9" fill="#A9B6C5" font-family="Figtree">monitored</text></svg>
+    </div>
+    <div class="devdots">${S.devices.map(d=>{const s=devState(d);return `<button class="devdot" data-act="open-device" data-id="${d.id}" aria-label="${esc(d.name)}, ${s.text}" title="${esc(d.name)} · ${s.text}">${ic(KIND[d.kind],'sm')}<span class="d ${S.loading?'grey':s.tone}"></span></button>`}).join('')}</div>`;
+
+  // card 3: privacy
+  const ps=privacyState();const P=S.privacy;const on=ps.key==='active'||ps.key==='degraded';
+  const big=ps.key==='active'?'Active':ps.key==='degraded'?'Degraded':ps.key==='unavailable'?'Unavailable':'Off';
+  const hrs=[.3,.2,.15,.15,.35,.7,.85,.6,.55,.75,.9,.6];
+  $('#c-priv').innerHTML=top('wave','teal','Activity Privacy','Experimental traffic shaping','open-privacy',null,'Adjust Activity Privacy')+
+    `<div style="display:flex;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="flex:none"><div class="big">${big}</div><div style="display:flex;gap:10px;align-items:center;margin-top:10px"><button class="switch" role="switch" aria-checked="${P.enabled}" aria-label="Activity Privacy" data-act="privacy-toggle" ${offline()?'disabled':''}></button><span class="muted" style="font-size:12.5px">${esc(ps.key==='inactive'&&P.enabled?ps.label:on?ps.label:'Traffic shaping off')}</span></div></div>
+      <div style="flex:1;min-width:0;max-width:200px"><div class="bars ${on?(ps.key==='degraded'?'deg':''):'off'}" aria-hidden="true">${hrs.map(h=>`<i style="height:${on?Math.round(h*Math.min(1,P.budget/200)*100):6}%"></i>`).join('')}</div>
+      <div class="bars-x"><span>00</span><span>12</span><span>24h</span></div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="demo-label">Demo data</span><span class="muted tnum" style="font-size:12.5px">${on?`Up to ${P.budget} MB/day added`:'No added traffic'}</span></div>`;
+  // card heights drive orbit placement
+  requestAnimationFrame(()=>{const h=$('#cards').offsetHeight;document.documentElement.style.setProperty('--cards-h',h+'px')});
+}
+
+/* ---------- devices ---------- */
+const POS2={net:[380,62],hub:[380,252],cam:[128,150],light:[128,372],motion:[380,420],laptop:[632,150],plug:[632,372]};
+function matches(d){
+  const q=S.search.trim().toLowerCase();
+  const okQ=!q||[d.name,d.room,d.kind,d.model].join(' ').toLowerCase().includes(q);
+  const okF=S.filter==='all'||(S.filter==='managed'&&d.status==='managed')||(S.filter==='review'&&(d.status==='pending'||devState(d).tone==='red'));
+  return okQ&&okF;
+}
+function renderDevices(){
+  const c=counts();
+  const fl=[['all','All',c.disc],['managed','Managed',c.managed],['review','Needs review',S.devices.filter(d=>d.status==='pending'||devState(d).tone==='red').length]];
+  $('#dev-filters').innerHTML=fl.map(([k,l,n])=>`<button class="fchip" data-act="filter" data-id="${k}" aria-pressed="${S.filter===k}">${l} <span class="tnum">${n}</span></button>`).join('');
+  const list=S.devices.filter(matches);
+  $('#dev-list').innerHTML=list.length?list.map(d=>{const s=devState(d);return `<li><button class="row" data-act="open-device" data-id="${d.id}" ${S.sel&&S.sel.id===d.id?'aria-current="true"':''}><span class="av">${ic(KIND[d.kind])}</span><span class="tx"><b>${esc(d.name)}</b><small>${esc(d.room)} · ${esc(d.model)}</small></span><span class="chip ${s.tone}">${esc(s.text)}</span></button></li>`}).join('')
+    :`<li class="empty">${ic('search')}<strong>No devices match “${esc(S.search)}”.</strong><span>Try a room name like “Study”, or <button class="link" data-act="clear-search">clear the search</button>.</span></li>`;
+  $$('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===S.mapMode)));
+  $('#map-area').innerHTML=S.mapMode==='map'?mapSVG():connTable();
+}
+function mapSVG(){
+  const vis=new Set(S.devices.filter(matches).map(d=>d.id));const anyQ=S.search.trim()||S.filter!=='all';
+  const col={teal:'var(--teal)',red:'var(--red)',amber:'var(--amber)',grey:'var(--grey)'};
+  let edges='',nodes='';
+  S.conns.forEach(c=>{
+    const a=POS2[c.from],b=POS2[c.to];const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy);const ux=dx/L,uy=dy/L;
+    const x1=a[0]+ux*36,y1=a[1]+uy*36,x2=b[0]-ux*40,y2=b[1]-uy*40;
+    const tone=offline()?'grey':connTone(c);const dash=c.status==='blocked'?'7 6':c.status==='pending'?'1.5 7':'';
+    const t=c.id==='c8'?.3:.5;const mx=a[0]+dx*t,my=a[1]+dy*t;
+    const dim=anyQ&&!(vis.has(c.from)||vis.has(c.to))?'dim':'';const sel=S.sel&&S.sel.type==='conn'&&S.sel.id===c.id?'sel':'';
+    const label=(c.status==='allowed'?'✓ ':c.status==='blocked'?'⊘ Blocked · ':'◷ Pending · ')+c.short;const w=label.length*6.3+18;
+    edges+=`<g class="edge ${dim} ${sel}" role="button" tabindex="0" data-act="open-conn" data-id="${c.id}" aria-label="${esc(nameOf(c.from))} to ${esc(nameOf(c.to))}: ${connWord(c)}, ${esc(c.purpose)}">
+      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="18"/>
+      <line class="vis" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col[tone]}" stroke-width="2.2" stroke-linecap="round" ${dash?`stroke-dasharray="${dash}"`:''} marker-end="url(#ar-${tone})"/>
+      <rect x="${mx-w/2}" y="${my-11}" width="${w}" height="22" rx="11" fill="#18222f" stroke="${col[tone]}" stroke-opacity=".5"/>
+      <text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11.5" font-weight="600" fill="${col[tone]}">${esc(label)}</text></g>`;
+  });
+  Object.keys(POS2).forEach(id=>{
+    const [x,y]=POS2[id];const isNet=id==='net';const d=isNet?null:dev(id);const s=isNet?{tone:offline()?'grey':'teal',text:'Outside your home'}:devState(d);
+    const dim=anyQ&&!isNet&&!vis.has(id)?'dim':'';const sel=S.sel&&S.sel.type==='device'&&S.sel.id===id?'sel':'';
+    nodes+=`<g class="node ${dim} ${sel}" ${isNet?'':`role="button" tabindex="0" data-act="open-device" data-id="${id}" aria-label="${esc(d.name)}, ${s.text}"`}>
+      <circle class="ring" cx="${x}" cy="${y}" r="32" fill="#202c3b" stroke="${col[s.tone]}" stroke-width="1.6"/>
+      <svg x="${x-12}" y="${y-12}" width="24" height="24" class="ic" style="color:#fff"><use href="#i-${isNet?'cloud':KIND[d.kind]}"/></svg>
+      <text x="${x}" y="${y+50}" text-anchor="middle" font-size="13" font-weight="600" fill="#F1F4F8">${esc(isNet?'Internet':d.name)}</text>
+      <text x="${x}" y="${y+66}" text-anchor="middle" font-size="11.5" fill="${col[s.tone]}">${esc(s.text)}</text></g>`;
+  });
+  const markers=['teal','red','amber','grey'].map(t=>`<marker id="ar-${t}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${col[t]}"/></marker>`).join('');
+  return `<div class="map-wrap"><svg class="map" viewBox="0 0 760 500" role="group" aria-label="Communication map. Select a device or connection for details."><defs>${markers}</defs>${edges}${nodes}</svg></div>
+    <div class="map-legend"><span><i style="border-color:var(--teal)"></i>Allowed</span><span><i style="border-color:var(--red);border-top-style:dashed"></i>Blocked</span><span><i style="border-color:var(--amber);border-top-style:dotted;border-top-width:3px"></i>Waiting for approval</span>${offline()?'<span class="st grey">'+ic('offline','sm')+'Gateway offline: showing last known rules</span>':''}</div>`;
+}
+function connTable(){
+  return `<div class="tbl-wrap"><table><thead><tr><th>From</th><th>To</th><th>Purpose</th><th>Status</th></tr></thead><tbody>${S.conns.map(c=>`<tr class="click" tabindex="0" data-act="open-conn" data-id="${c.id}"><td>${esc(nameOf(c.from))}</td><td>${esc(nameOf(c.to))}</td><td class="muted">${esc(c.purpose)}</td><td><span class="st ${connTone(c)}">${ic(connIcon(c),'sm')}${connWord(c)}</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---------- incidents ---------- */
+function renderIncidents(){
+  const fl=[['all','All'],['active','Active'],['contained','Contained'],['resolved','Resolved']];
+  $('#inc-filters').innerHTML=fl.map(([k,l])=>`<button class="fchip" data-act="incfilter" data-id="${k}" aria-pressed="${S.incFilter===k}">${l} <span class="tnum">${k==='all'?S.incidents.length:S.incidents.filter(i=>i.status===k).length}</span></button>`).join('');
+  const list=S.incidents.filter(i=>S.incFilter==='all'||i.status===S.incFilter);
+  const tone={active:'red',contained:'teal',resolved:'grey'},word={active:'Active',contained:'Contained',resolved:'Resolved'};
+  let html=offline()?`<div class="errbox">${ic('offline')}<span>Gateway offline. New incidents can't be detected until it reconnects. This list shows what was known at 21:50.</span></div>`:'';
+  html+=list.length?list.map(i=>`<button class="inc" data-act="open-incident" data-id="${i.id}"><span class="stripe ${tone[i.status]}"></span><span class="row" style="padding:0"><span class="av">${ic(KIND[dev(i.device).kind])}</span></span><span style="min-width:0"><b>${esc(i.title)}</b><small>${esc(i.id)} · ${esc(i.when)}</small></span><span class="chip ${tone[i.status]}">${word[i.status]}</span></button>`).join('')
+    :`<div class="panel empty">${ic('shield')}<strong>No ${S.incFilter} incidents.</strong><span>${offline()?'Monitoring is unavailable while the gateway is offline.':`Monitoring ${counts().managed} of ${counts().disc} devices.`}</span></div>`;
+  $('#inc-list').innerHTML=html;
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  const st=S.settings;
+  const sw=(k,label,sub)=>`<div class="set-row"><span><span class="l" id="l-${k}">${label}</span><small>${sub}</small></span><button class="switch" role="switch" aria-labelledby="l-${k}" aria-checked="${st[k]}" data-act="setting" data-id="${k}"></button></div>`;
+  let test='';
+  if(S.test==='running') test=`<div class="result"><span class="spin"></span>Contacting gateway HS-1…</div>`;
+  else if(S.test==='ok') test=`<div class="result ok">${ic('check')}<span>Gateway reachable. Round trip 12 ms. Rules are in sync.</span></div>`;
+  else if(S.test==='err') test=`<div class="result err">${ic('alert')}<span>Gateway HS-1 didn't respond. Check that it has power and that its cable is plugged into your router, then try again.</span></div>`;
+  $('#settings').innerHTML=`
+  <section class="panel"><div class="panel-head"><h2>Gateway</h2><span class="chip ${offline()?'red':'teal'}">${offline()?'Offline':'Online'}</span></div>
+    <dl class="kv"><dt>Name</dt><dd>HS-1 · Hallway</dd><dt>Firmware</dt><dd>3.2.0</dd><dt>Network</dt><dd>192.168.1.0/24</dd><dt>Rule engine</dt><dd>Simulated in this prototype</dd></dl>
+    <div style="margin-top:16px"><button class="btn" data-act="run-test" ${S.test==='running'?'disabled':''}>Test gateway connection</button></div>${test}</section>
+  <section class="panel"><div class="panel-head"><h2>New devices</h2></div>
+    <label class="opt"><input type="radio" name="np" id="np-hold" value="hold" data-act="newpolicy" ${st.newPolicy==='hold'?'checked':''}><span><b>Hold for my approval</b> (recommended)<small>New devices can't reach anything until you review their permissions.</small></span></label>
+    <label class="opt"><input type="radio" name="np" id="np-local" value="local" data-act="newpolicy" ${st.newPolicy==='local'?'checked':''}><span><b>Allow local control only</b><small>New devices can talk to Home Hub. Internet and other devices wait for approval.</small></span></label></section>
+  <section class="panel"><div class="panel-head"><h2>Notifications</h2></div>${sw('notifyInc','Incidents','Tell me when a device breaks a rule')}${sw('notifyNew','New devices','Tell me when a device joins the network')}${sw('weekly','Weekly summary','A short recap every Sunday')}</section>
+  <section class="panel"><div class="panel-head"><h2>Display and prototype</h2></div>${sw('reduce','Reduce animations','Stops the house from turning and slows traffic effects')}
+    <div class="set-row"><span><span class="l">About this prototype</span><small>Everything here is simulated. HomeShield isn't connected to a real network and doesn't protect any devices.</small></span><button class="btn small" data-act="reset">Reset demo</button></div></section>`;
+}
+
+/* ---------- drawer ---------- */
+let lastFocus=null;
+function openDrawer(type,id){
+  closePops();
+  if(!S.drawer) lastFocus=document.activeElement;
+  S.drawer={type,id};S.sel={type,id};S.isolateAsk=null;S.applyErr=null;S.confirmBroad=false;
+  render();const d=$('#drawer');d.hidden=false;requestAnimationFrame(()=>{d.classList.add('on');$('#scrim').classList.add('on')});
+  setTimeout(()=>{const h=$('#dr-title');h&&h.focus()},40);
+}
+function closeDrawer(){
+  if(!S.drawer) return;S.drawer=null;S.sel=null;
+  const d=$('#drawer');d.classList.remove('on');$('#scrim').classList.remove('on');
+  setTimeout(()=>{if(!S.drawer)d.hidden=true},330);render();
+  if(lastFocus&&document.contains(lastFocus)) lastFocus.focus();
+}
+function head(eyebrow,title,iconName){return `<div class="dr-head"><span class="row" style="padding:0;width:auto"><span class="av">${ic(iconName)}</span></span><div style="min-width:0"><div class="eyebrow">${eyebrow}</div><h2 id="dr-title" tabindex="-1">${esc(title)}</h2></div><button class="rnd x" data-act="close" aria-label="Close">${ic('x')}</button></div>`}
+function renderDrawer(){
+  const el=$('#drawer');if(!S.drawer)return;
+  const fk=document.activeElement&&el.contains(document.activeElement)?(document.activeElement.dataset.act||'')+'|'+(document.activeElement.dataset.id||''):null;
+  const st=el.querySelector('.dr-body');const sc=st?st.scrollTop:0;
+  const {type,id}=S.drawer;
+  el.innerHTML=type==='device'?drDevice(dev(id)):type==='conn'?drConn(conn(id)):type==='incident'?drIncident(inc(id)):drPrivacy();
+  const nb=el.querySelector('.dr-body');if(nb)nb.scrollTop=sc;
+  if(fk&&!S._focusAfter){const [a,i]=fk.split('|');const t=el.querySelector(`[data-act="${a}"]${i?`[data-id="${i}"]`:''}`);if(t)t.focus()}
+  if(S._focusAfter){const f=el.querySelector(S._focusAfter);if(f)f.focus();S._focusAfter=null}
+}
+function connItems(id){return `<ul class="connlist">${connsOf(id).map(c=>{const other=c.from===id?c.to:c.from;return `<li><button data-act="open-conn" data-id="${c.id}"><span class="st ${connTone(c)}">${ic(connIcon(c))}</span><span class="tx">${c.from===id?'To':'From'} ${esc(nameOf(other))}<small>${esc(c.purpose)} · ${connWord(c)}</small></span>${ic('chev-r','sm')}</button></li>`}).join('')}</ul>`}
+const offlineNote=()=>offline()?`<div class="errbox">${ic('offline')}<span>The gateway is offline, so changes can't be applied right now. Showing the last known state.</span></div>`:'';
+function drDevice(d){
+  const s=devState(d);let body=offlineNote();
+  if(d.status==='pending'){
+    const P=S.perms;const broad=P.laptop||P.discovery;const n=Object.values(P).filter(Boolean).length;
+    const perm=(k,title,sub,rec)=>`<label class="perm" for="pm-${k}"><input type="checkbox" id="pm-${k}" data-act="perm" data-id="${k}" ${P[k]?'checked':''}><span style="min-width:0"><b>${title}</b><small>${sub}</small></span><span class="chip ${rec?'teal':'grey'} tag">${rec?'Needed':'Not needed'}</span></label>`;
+    body+=`<section><h3>Review before approving</h3><p class="muted" style="margin-bottom:12px">The plug asked for 4 permissions. It needs 2 of them to work. We've only selected those.</p>
+      <div class="perm-list">${perm('hub','Local control from Home Hub','Turn the plug on and off from your app and automations',true)}${perm('cloud','Vendor cloud: energy reports and updates','cloud.voltaplug.com over encrypted MQTT',true)}${perm('laptop','Connect to Personal Laptop','No plug feature uses this',false)}${perm('discovery','Scan your network for other devices','Lets the plug see every device in your home',false)}</div>
+      ${S.confirmBroad?`<div class="confirm" style="margin-top:12px"><h4>Grant broader access?</h4><p>${P.laptop?'The plug will be able to open connections to your laptop. ':''}${P.discovery?'The plug will be able to see every device on your network. ':''}Plugs don't need this, and it gives a compromised plug a path to your other devices.</p><div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn danger" data-act="approve" data-id="force">Grant broader access</button><button class="btn ghost" data-act="cancel-broad">Go back</button></div></div>`:''}
+      ${S.applyErr?`<div class="errbox" style="margin-top:12px">${ic('alert')}<span>${S.applyErr}</span></div>`:''}
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn primary" data-act="approve" ${offline()?'disabled':''}>${broad?'Approve with broader access':`Approve ${n} permission${n===1?'':'s'}`}</button><button class="btn ghost" data-act="plug-later">Not now</button></div>
+      <p class="faint" style="font-size:13px;margin-top:10px">Until you approve, the plug stays on hold and can't reach other devices or the internet.</p></section>`;
+  }
+  const ai=S.incidents.find(i=>i.device===d.id&&i.status!=='resolved');
+  if(ai) body+=`<section><h3>Incident</h3><button class="row" style="border:1px solid var(--line);border-radius:12px" data-act="open-incident" data-id="${ai.id}"><span class="av" style="color:var(--${ai.status==='active'?'red':'teal'})">${ic('alert')}</span><span class="tx"><b>${esc(ai.title)}</b><small>${ai.status==='active'?'Active · Review recommended':'Contained'}</small></span>${ic('chev-r','sm')}</button></section>`;
+  body+=`<section><h3>Identity</h3><dl class="kv"><dt>Status</dt><dd><span class="st ${d.identity==='Verified'?'teal':'amber'}">${ic(d.identity==='Verified'?'check':'info','sm')}${esc(d.identity)}</span><br><span class="muted">${esc(d.idNote)}</span></dd><dt>Model</dt><dd>${esc(d.model)}</dd><dt>Address</dt><dd class="mono">${esc(d.ip)}</dd><dt>MAC</dt><dd class="mono">${esc(d.mac)}</dd><dt>Firmware</dt><dd>${esc(d.fw)}</dd><dt>First seen</dt><dd>${esc(d.since)}</dd></dl></section>`;
+  body+=`<section><h3>${d.status==='pending'?'Requested connections':'Approved connections'}</h3>${connItems(d.id)}</section>`;
+  const acts=S.activity.filter(a=>a.dev.includes(d.id)).slice(0,5);
+  body+=`<section><h3>Observed activity <span class="demo-label" style="margin-left:6px">Simulated</span></h3>${acts.length?`<ul class="feed">${acts.map(a=>`<li><time>${a.t}</time><span class="m ${a.tone}"></span><span>${esc(a.text)}</span></li>`).join('')}</ul>`:'<p class="muted">No activity in the last 24 hours.</p>'}</section>`;
+  if(d.status==='managed'){
+    const stops=connsOf(d.id).filter(c=>c.status==='allowed').map(c=>c.purpose);
+    if(d.isolated) body+=`<section><h3>Controls</h3><p class="muted" style="margin-bottom:12px">Isolated since ${esc(d.isolatedAt)}. Every connection to and from this device is blocked.</p><button class="btn" data-act="reconnect" data-id="${d.id}" ${offline()?'disabled':''}>${ic('undo','sm')}Reconnect ${esc(d.name)}</button></section>`;
+    else body+=`<section><h3>Controls</h3>${S.isolateAsk===d.id?isoConfirm(d,stops):`<button class="btn" data-act="ask-isolate" data-id="${d.id}" ${offline()?'disabled':''}>${ic('lock','sm')}Isolate device…</button><p class="faint" style="font-size:13px;margin-top:8px">Blocks every connection to and from this device. You'll see the impact before anything changes.</p>`}</section>`;
+  }
+  return head(`${esc(d.room)} · <span class="st ${s.tone}">${esc(s.text)}</span>`,d.name,KIND[d.kind])+`<div class="dr-body">${body}</div>`;
+}
+function isoConfirm(d,stops){return `<div class="confirm" id="iso-confirm"><h4>Isolate ${esc(d.name)}?</h4><p style="margin-bottom:8px">These will stop working until you reconnect it:</p><ul class="effects" style="margin:0 0 12px">${stops.length?stops.map(s=>`<li>${ic('block','sm')}<span>${esc(s)}</span></li>`).join(''):'<li>'+ic('info','sm')+'<span>No allowed connections are active.</span></li>'}</ul><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn danger" data-act="isolate" data-id="${d.id}">Isolate device</button><button class="btn ghost" data-act="cancel-isolate">Cancel</button></div></div>`}
+function drConn(c){
+  let body=offlineNote();
+  body+=`<section><span class="st ${connTone(c)}" style="font-size:16px">${ic(connIcon(c))}${connWord(c)}</span><p class="muted" style="margin-top:6px">${esc(ruleText(c))}</p></section>`;
+  body+=`<section><h3>Details</h3><dl class="kv"><dt>Purpose</dt><dd>${esc(c.purpose)}</dd><dt>From</dt><dd>${esc(nameOf(c.from))}</dd><dt>To</dt><dd>${esc(nameOf(c.to))}</dd><dt>Protocol</dt><dd class="mono">${esc(c.proto)}</dd><dt>Observed</dt><dd>${esc(c.seen)} <span class="demo-label">Simulated</span></dd></dl></section>`;
+  let ctl='';
+  if(c.id==='c8')ctl=`<button class="btn primary" data-act="open-incident" data-id="INC-1042">Review the incident</button>`;
+  else if(c.status==='pending')ctl=`<button class="btn primary" data-act="open-device" data-id="${c.from}">Review ${esc(nameOf(c.from))}</button>`;
+  else if(c.status==='allowed')ctl=`<button class="btn" data-act="block-conn" data-id="${c.id}" ${offline()?'disabled':''}>${ic('block','sm')}Block this connection</button><p class="faint" style="font-size:13px;margin-top:8px">Stops: ${esc(c.purpose.toLowerCase())}. You can undo this.</p>`;
+  else if(c.source==='user')ctl=`<button class="btn" data-act="unblock-conn" data-id="${c.id}" ${offline()?'disabled':''}>${ic('undo','sm')}Undo this change</button>`;
+  else if(c.source==='isolate'){const d=dev(c.from)&&dev(c.from).isolated?c.from:c.to;ctl=`<button class="btn" data-act="open-device" data-id="${d}">Manage isolation</button>`}
+  else if(c.source==='onboarding')ctl=`<p class="muted">Not granted when you approved this device. Plugs don't need it.</p>`;
+  body+=`<section><h3>Controls</h3>${ctl}</section>`;
+  return head('Connection',`${nameOf(c.from)} → ${nameOf(c.to)}`,'net')+`<div class="dr-body">${body}</div>`;
+}
+const CHECKS={
+  rule:[{n:'Camera local viewing',r:'pass',d:'Live stream reached Home Hub in 0.4 s.'},{n:'Motion-to-light automation',r:'pass',d:'Hallway motion turned on Living Room Light in 1.1 s.'},{n:'Vendor remote viewing',r:'unverified',d:'Needs a test from outside your home network. Open the camera app on mobile data to confirm.'}],
+  isolate:[{n:'Camera local viewing',r:'stopped',d:'Stopped, as expected while the camera is isolated.'},{n:'Motion-to-light automation',r:'pass',d:'Doesn\'t use the camera. Light turned on in 1.0 s.'},{n:'Vendor remote viewing',r:'stopped',d:'Stopped, as expected while the camera is isolated.'}]
+};
+function checkList(kind,running){
+  const R={pass:['teal','check','Passed'],unverified:['amber','info','Not verified'],stopped:['red','block','Stopped (expected)']};
+  return `<ul class="checks">${CHECKS[kind].map(c=>{const r=R[c.r];return running?`<li><span class="spin" style="margin-top:2px"></span><span>${c.n}<small>Checking…</small></span><span class="faint">Running</span></li>`:`<li><span class="st ${r[0]}">${ic(r[1])}</span><span>${c.n}<small>${c.d}</small></span><span class="st ${r[0]}">${r[2]}</span></li>`}).join('')}</ul>`;
+}
+function drIncident(I){
+  const D=dev(I.device);
+  const tone={active:'red',contained:'teal',resolved:'grey'}[I.status],word={active:'Active',contained:'Contained',resolved:'Resolved'}[I.status];
+  if(I.id!=='INC-1042'){
+    return head(`${I.id} · <span class="st ${tone}">${word}</span>`,I.title,'alert')+`<div class="dr-body">
+      <section><h3>What happened</h3><p>${esc(I.title)} ${I.id==='INC-1031'?'The download came from a server HomeShield hadn\'t seen before, so it was held for review.':'HomeShield flagged the gap because the sensor normally reports every 60 seconds.'}</p></section>
+      <section><h3>Resolution</h3><p>${esc(I.resolution)}</p></section>
+      <section><h3>Evidence</h3><ul class="timeline"><li><time>${I.id==='INC-1031'?'09:14:22':'02:03:10'}</time><span>${I.id==='INC-1031'?'Home Hub requested firmware from dl-eu2.hubvendor.com':'Last report from Hallway Motion Sensor'}</span></li><li><time>${I.id==='INC-1031'?'09:31:05':'02:17:44'}</time><span>${I.id==='INC-1031'?'You approved the server':'Sensor reported again'}</span></li></ul></section></div>`;
+  }
+  const C8=conn('c8');const ch=S.change;
+  let body=I.status==='active'||!ch?offlineNote():'';
+  body+=`<section><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip grey">${ic('clock','sm')}Today, 21:47</span><span class="chip grey">${ic('laptop','sm')}Personal Laptop</span><span class="chip red">${ic('block','sm')}${C8.source==='rule'?'Blocked by rule HS-R17':C8.source==='isolate'?'Blocked: camera isolated':'Connection blocked by your policy'}</span></div></section>`;
+  body+=`<section><h3>What happened</h3><p>Your camera tried to open a file-sharing connection to your laptop 14 times in 6 seconds. Cameras don't need to reach laptops, so HomeShield blocked every attempt. Nothing reached the laptop.</p></section>`;
+  body+=`<section><h3>How sure are we?</h3><div class="verdict"><div><b>Policy violation</b><span class="st red">${ic('check','sm')}Confirmed</span><p class="muted" style="font-size:13px;margin-top:4px">The camera tried a connection your rules don't allow.</p></div><div><b>Compromise</b><span class="st grey">${ic('info','sm')}Not confirmed</span><p class="muted" style="font-size:13px;margin-top:4px">A faulty update or malware scanning your network can both cause this. Traffic alone can't tell them apart.</p></div></div></section>`;
+  body+=`<section><h3>Evidence</h3><ul class="timeline"><li><time>21:31:40</time><span>Camera installed firmware 4.36.11.8391 from its vendor</span></li><li><time>21:47:03</time><span>First attempt: camera → laptop, port 445 (file sharing)</span></li><li><time>21:47:09</time><span>Last of 14 attempts. All blocked at the gateway.</span></li><li><time>Past 7 days</time><span>Camera talked only to Home Hub and its vendor relay</span></li></ul></section>`;
+  if(I.status==='active'){
+    body+=`<section><h3>Recommended action</h3><div class="reco"><h4>Keep camera-to-laptop connection blocked</h4><p class="muted">Makes the block permanent with one rule. Nothing else about the camera changes.</p>
+      <ul class="effects"><li class="st teal">${ic('check','sm')}<span style="color:var(--fg)">Camera live view through Home Hub keeps working</span></li><li class="st teal">${ic('check','sm')}<span style="color:var(--fg)">Motion-to-light automation keeps working</span></li><li class="st teal">${ic('check','sm')}<span style="color:var(--fg)">Vendor remote viewing should keep working</span></li><li class="st red">${ic('block','sm')}<span style="color:var(--fg)">Camera can never reach the laptop directly. No camera feature uses this.</span></li></ul>
+      ${S.applyErr?`<div class="errbox" style="margin-bottom:12px">${ic('alert')}<span>${S.applyErr}</span></div>`:''}
+      <button class="btn primary" data-act="apply-rule" ${offline()?'disabled':''}>${ic('shield','sm')}Keep camera-to-laptop connection blocked</button></div>
+      <div style="margin-top:14px">${S.isolateAsk==='cam'?isoConfirm(D,connsOf('cam').filter(c=>c.status==='allowed').map(c=>c.purpose)):`<button class="link" data-act="ask-isolate" data-id="cam" ${offline()?'disabled':''}>Isolate the whole camera instead…</button><p class="faint" style="font-size:13px;margin-top:4px">Stronger, but live view, recording and remote viewing stop until you reconnect it.</p>`}</div></section>`;
+  } else if(ch){
+    const running=ch.checks==='running';
+    body+=`<section><h3>Change applied</h3><div class="applied" id="applied" tabindex="-1">
+      <p style="margin-bottom:4px"><span class="st teal">${ic('check')}${ch.kind==='rule'?'Rule HS-R17 applied':'Camera isolated'} at ${ch.at}</span></p>
+      <p class="muted">${ch.kind==='rule'?'Living Room Camera → Personal Laptop is now blocked permanently.':'Every connection to and from Living Room Camera is blocked.'}</p>
+      <div style="margin-top:14px" class="eyebrow">Functional checks <span class="demo-label" style="margin-left:6px">Simulated</span></div>
+      ${checkList(ch.kind,running)}
+      ${running?'':`<p class="faint" style="font-size:13px;margin:4px 0 14px">These checks show everyday functions still work. They don't show that the camera is free of malware. Watch for new incidents and keep its firmware updated.</p>`}
+      <button class="btn" data-act="undo" ${running||offline()?'disabled':''}>${ic('undo','sm')}Undo this change</button>
+      <p class="faint" style="font-size:13px;margin-top:8px">${ch.kind==='rule'?'Removes only rule HS-R17. The connection goes back to a temporary block waiting for your decision.':'Reconnects the camera and restores only the connections it had before.'}</p></div></section>`;
+  }
+  body+=`<details><summary>Technical details${ic('chev-d','sm')}</summary><div class="inner"><dl class="kv"><dt>Source</dt><dd class="mono">192.168.1.42 · 2C:AA:8E:4F:19:07</dd><dt>Destination</dt><dd class="mono">192.168.1.23:445 (SMB)</dd><dt>Attempts</dt><dd class="mono">14 TCP SYN, 21:47:03.118 to 21:47:09.402</dd><dt>Matched policy</dt><dd class="mono">default-deny: cameras → computers</dd><dt>Camera firmware</dt><dd class="mono">4.36.11.8391 (installed 21:31)</dd><dt>Enforcement</dt><dd>Simulated gateway HS-1</dd></dl></div></details>`;
+  return head(`${I.id} · <span class="st ${tone}">${word}</span>`,I.title,'camera')+`<div class="dr-body">${body}</div>`;
+}
+function privMetrics(){
+  const ps=privacyState();const P=S.privacy;const on=ps.key==='active'||ps.key==='degraded';
+  const added=on?Math.round(Math.min(P.budget,ps.need)*(S.scenario==='degraded'?.55:1)):0;
+  const lat=!on?'—':S.scenario==='degraded'?'+240 ms':P.budget<ps.need?'+22 ms':'+18 ms';
+  return `<div class="metrics"><div class="metric"><b class="tnum">${on?added+' MB':'—'}</b><small>Added traffic per day of ${P.budget} MB budget</small></div><div class="metric"><b class="tnum">${lat}</b><small>Measured added latency (median)</small></div></div><p style="margin-top:8px"><span class="demo-label">${ic('flask','sm')}Demonstration data</span> <span class="faint" style="font-size:13px">Not measured on a real network.</span></p>`;
+}
+function drPrivacy(){
+  const ps=privacyState();const P=S.privacy;
+  const body=`<section><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="chip ${ps.tone}">${esc(ps.key==='inactive'&&!P.enabled?'Off':ps.label)}</span><button class="switch" role="switch" aria-checked="${P.enabled}" aria-label="Activity Privacy" data-act="privacy-toggle" ${offline()?'disabled':''}></button></div>
+    ${ps.why?`<div class="warnbox" style="margin-top:12px">${esc(ps.why)}</div>`:''}
+    <p class="muted" style="margin-top:12px">Experimental. Adds cover traffic and evens out timing on the connection between your gateway and the HomeShield relay. This makes it harder for someone watching that connection, like your internet provider, to infer when you're home, asleep or using a device.</p></section>
+    <section><h3>Traffic to shape</h3>${FLOWS.map(f=>`<label class="flow" for="fl-${f.key}"><input type="checkbox" id="fl-${f.key}" data-act="flow" data-id="${f.key}" ${P.flows[f.key]?'checked':''}><span style="flex:1">${f.label}</span><span class="faint tnum">~${f.mb} MB/day</span></label>`).join('')}</section>
+    <section><h3>Bandwidth budget</h3><label for="budget" style="display:flex;justify-content:space-between"><span>Extra data per day</span><b class="tnum" id="budget-v">${P.budget} MB</b></label>
+      <input class="range" type="range" id="budget" min="50" max="500" step="25" value="${P.budget}" data-act="budget" aria-describedby="budget-help"><p class="faint" id="budget-help" style="font-size:13px">About ${(P.budget*30/1000).toFixed(1)} GB per month. Shaping stops when the budget is used up.</p></section>
+    <section><h3>Measurements</h3><div id="pv-metrics">${privMetrics()}</div></section>
+    <section><h3>Coverage</h3><ul class="connlist" style="gap:4px">${FLOWS.map(f=>`<li class="flow" style="border:0;padding:4px 0">${P.flows[f.key]&&P.enabled?`<span class="st teal">${ic('check','sm')}</span>`:`<span class="st grey">${ic('minus','sm')}</span>`}<span>${f.label}</span><span class="faint" style="margin-left:auto">${P.flows[f.key]&&P.enabled?(S.scenario==='degraded'&&f.key==='cam'?'Paused':'Covered'):'Not selected'}</span></li>`).join('')}
+      <li class="flow" style="border:0;padding:4px 0"><span class="st amber">${ic('info','sm')}</span><span>Camera live video</span><span class="faint" style="margin-left:auto">Not covered</span></li>
+      <li class="flow" style="border:0;padding:4px 0"><span class="st amber">${ic('info','sm')}</span><span>Personal Laptop traffic</span><span class="faint" style="margin-left:auto">Not supported</span></li>
+      <li class="flow" style="border:0;padding:4px 0"><span class="st amber">${ic('info','sm')}</span><span>New Smart Plug</span><span class="faint" style="margin-left:auto">${dev('plug').status==='pending'?'After approval':'Not supported yet'}</span></li></ul></section>
+    <details><summary>Limitations${ic('chev-d','sm')}</summary><div class="inner"><ul class="effects" style="margin:0">
+      <li>${ic('info','sm')}<span>Device makers still see the real data their devices send to them.</span></li>
+      <li>${ic('info','sm')}<span>Doesn't hide Wi-Fi radio activity that someone nearby could observe.</span></li>
+      <li>${ic('info','sm')}<span>Live video is too large to shape within a home budget.</span></li>
+      <li>${ic('info','sm')}<span>Reduces how much an observer can infer. It doesn't guarantee your activity stays private.</span></li></ul></div></details>`;
+  return head('Overview','Activity Privacy','wave')+`<div class="dr-body">${body}</div>`;
+}
+
+/* ---------- toasts ---------- */
+function toast(msg,action){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`${ic('check')}<span class="grow">${esc(msg)}</span>${action?`<button class="btn small" data-act="${action.act}" data-id="${action.id}">${esc(action.label)}</button>`:''}`;
+  $('#toasts').appendChild(t);setTimeout(()=>t.remove(),action?7000:4200);
+}
+
+/* ---------- actions ---------- */
+function applyRule(){
+  if(offline()){S.applyErr='The gateway is offline, so the rule can\'t be applied. Try again when it reconnects.';return render()}
+  conn('c8').source='rule';inc('INC-1042').status='contained';S.isolateAsk=null;S.applyErr=null;
+  S.change={kind:'rule',at:tick(),checks:'running'};
+  log('teal','You kept Living Room Camera → Personal Laptop blocked (rule HS-R17).',['cam','laptop'],['incident','INC-1042']);
+  S._focusAfter='#applied';render();H3.pulse();
+  setTimeout(()=>{if(S.change&&S.change.kind==='rule'){S.change.checks='done';log('teal','Functional checks finished: 2 passed, 1 not verified.',['cam','motion','light'],['incident','INC-1042']);render()}},1700);
+}
+function isolate(id){
+  if(offline())return;
+  const d=dev(id);d.isolated=true;d.isolatedAt=tick();S.clock--;
+  connsOf(id).forEach(c=>{c.prev={status:c.status,source:c.source};c.status='blocked';c.source='isolate'});
+  S.isolateAsk=null;
+  if(id==='cam'){const I=inc('INC-1042');if(I.status!=='resolved'){I.status='contained';S.change={kind:'isolate',at:tick(),checks:'running'};S._focusAfter='#applied';setTimeout(()=>{if(S.change&&S.change.kind==='isolate'){S.change.checks='done';log('teal','Functional checks finished: 1 passed, 2 stopped as expected.',['cam']);render()}},1700)}}
+  else tick();
+  log('red',`You isolated ${d.name}. All its connections are blocked.`,[id],['device',id]);
+  toast(`${d.name} isolated`);render();H3.pulse();
+}
+function reconnect(id){
+  if(offline())return;
+  const d=dev(id);d.isolated=false;
+  connsOf(id).forEach(c=>{if(c.prev){c.status=c.prev.status;c.source=c.prev.source;delete c.prev}});
+  if(id==='cam'&&S.change&&S.change.kind==='isolate'){S.change=null;inc('INC-1042').status=conn('c8').source==='rule'?'contained':'active'}
+  log('teal',`You reconnected ${d.name}. Its previous connections are restored.`,[id]);
+  toast(`${d.name} reconnected`);render();
+}
+function undo(){
+  const ch=S.change;if(!ch||offline())return;
+  if(ch.kind==='rule'){conn('c8').source='hold';inc('INC-1042').status='active';S.change=null;
+    log('amber','You removed rule HS-R17. Camera → Laptop is blocked temporarily and waiting for your decision.',['cam','laptop'],['incident','INC-1042']);
+    toast('Change undone. Only rule HS-R17 was removed.');render()}
+  else reconnect('cam');
+}
+function approve(force){
+  if(offline()){S.applyErr='The gateway is offline. Try again when it reconnects.';return render()}
+  const P=S.perms;const broad=P.laptop||P.discovery;
+  if(broad&&!force&&!S.confirmBroad){S.confirmBroad=true;S._focusAfter='[data-act="approve"][data-id="force"]';return render()}
+  dev('plug').status='managed';
+  const set=(cid,ok)=>{const c=conn(cid);c.status=ok?'allowed':'blocked';c.source=ok?'approved':'onboarding';c.seen=ok?'Approved just now':'Not granted'};
+  set('c9',P.hub);set('c10',P.cloud);set('c11',P.laptop);
+  const n=Object.values(P).filter(Boolean).length;
+  log('teal',`You approved New Smart Plug with ${n} of 4 requested permissions.`,['plug'],['device','plug']);
+  S.confirmBroad=false;toast(`New Smart Plug approved with ${n} of 4 permissions`);render();
+}
+function blockConn(id){
+  if(offline())return;const c=conn(id);c.prev={status:c.status,source:c.source};c.status='blocked';c.source='user';
+  log('red',`You blocked ${nameOf(c.from)} → ${nameOf(c.to)} (${c.purpose.toLowerCase()}).`,[c.from,c.to],['conn',id]);
+  toast(`Blocked ${nameOf(c.from)} → ${nameOf(c.to)}`,{act:'unblock-conn',id,label:'Undo'});render();
+}
+function unblockConn(id){
+  const c=conn(id);if(!c.prev||c.source!=='user')return;c.status=c.prev.status;c.source=c.prev.source;delete c.prev;
+  log('teal',`You restored ${nameOf(c.from)} → ${nameOf(c.to)}.`,[c.from,c.to]);toast('Connection restored');render();
+}
+function setScenario(s){
+  if(s===S.scenario){closePops();return}const was=S.scenario;S.scenario=s;
+  if(s==='offline')log('amber','Gateway HS-1 stopped responding. Monitoring is unavailable.',[]);
+  else if(was==='offline')log('teal','Gateway HS-1 reconnected. Monitoring resumed.',[]);
+  if(s==='degraded'){S.privacy.enabled=true;log('amber','HomeShield relay is slow. Traffic shaping is partly paused.',[],['privacy','x'])}
+  S.applyErr=null;closePops();render();
+  toast({normal:'Scenario: normal',offline:'Scenario: gateway offline',degraded:'Scenario: privacy degraded'}[s]);
+}
+function closePops(){$('#demo-menu').hidden=true;$('#bell-pop').hidden=true;$('#demo-btn').setAttribute('aria-expanded','false');$('#bell-btn').setAttribute('aria-expanded','false');$('#notes').style.visibility=''}
+function togglePop(id,btn){const p=$(id);const open=p.hidden;closePops();p.hidden=!open;btn.setAttribute('aria-expanded',String(open));$('#notes').style.visibility=open?'hidden':'';if(open){const f=p.querySelector('[aria-checked="true"]');f&&f.focus()}}
+
+function render(){
+  renderChrome();
+  if(S.view==='overview')renderOverview();
+  if(S.view==='devices')renderDevices();
+  if(S.view==='incidents')renderIncidents();
+  if(S.view==='settings')renderSettings();
+  renderDrawer();
+  document.documentElement.classList.toggle('rm',S.settings.reduce);
+  H3.sync();
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');
+  if(!e.target.closest('.hdr-r'))closePops();
+  if(!t||t.tagName==='INPUT')return;const a=t.dataset.act,id=t.dataset.id;
+  switch(a){
+    case 'nav': S.view=id;closeDrawer();closePops();render();window.scrollTo({top:0});H3.setActive(id==='overview');break;
+    case 'open-device': openDrawer('device',id);break;
+    case 'open-conn': openDrawer('conn',id);break;
+    case 'open-incident': openDrawer('incident',id);break;
+    case 'open-privacy': openDrawer('privacy');break;
+    case 'close': closeDrawer();break;
+    case 'apply-rule': applyRule();break;
+    case 'ask-isolate': S.isolateAsk=id;S._focusAfter='#iso-confirm .btn.danger';render();break;
+    case 'cancel-isolate': S.isolateAsk=null;render();break;
+    case 'isolate': isolate(id);break;
+    case 'reconnect': reconnect(id);break;
+    case 'undo': undo();break;
+    case 'approve': approve(id==='force');break;
+    case 'cancel-broad': S.confirmBroad=false;render();break;
+    case 'plug-later': closeDrawer();toast('New Smart Plug stays on hold. It can\'t reach anything until you approve it.');break;
+    case 'block-conn': blockConn(id);break;
+    case 'unblock-conn': unblockConn(id);break;
+    case 'privacy-toggle': if(offline())break;S.privacy.enabled=!S.privacy.enabled;log('grey',`You turned Activity Privacy ${S.privacy.enabled?'on':'off'}.`,[],['privacy','x']);render();break;
+    case 'mode': S.mode=id;render();break;
+    case 'filter': S.filter=id;render();break;
+    case 'clear-search': S.search='';$('#dev-search').value='';render();$('#dev-search').focus();break;
+    case 'mapmode': S.mapMode=id;render();break;
+    case 'incfilter': S.incFilter=id;render();break;
+    case 'zoom': H3.zoom(id);break;
+    case 'spin': H3.spin(+id);break;
+    case 'demo-menu': togglePop('#demo-menu',t);break;
+    case 'bell': togglePop('#bell-pop',$('#bell-btn'));break;
+    case 'scenario': setScenario(id);break;
+    case 'setting': S.settings[id]=!S.settings[id];render();toast(`${$('#l-'+id).textContent} ${S.settings[id]?'on':'off'}`);break;
+    case 'run-test': S.test='running';render();setTimeout(()=>{S.test=offline()?'err':'ok';render()},1300);break;
+    case 'reset': {const v=S.view;S=initial();S.loading=false;S.view=v;$('#dev-search').value='';closeDrawer();render();toast('Demo reset');break}
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;const a=t.dataset.act;if(!a)return;
+  if(a==='perm'){S.perms[t.dataset.id]=t.checked;S.confirmBroad=false;render()}
+  if(a==='flow'){S.privacy.flows[t.dataset.id]=t.checked;render()}
+  if(a==='newpolicy'){S.settings.newPolicy=t.value;toast('New-device policy saved')}
+  if(a==='budget')render();
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='dev-search'){S.search=t.value;renderDevices()}
+  if(t.dataset.act==='budget'){S.privacy.budget=+t.value;$('#budget-v').textContent=t.value+' MB';$('#budget-help').textContent=`About ${(t.value*30/1000).toFixed(1)} GB per month. Shaping stops when the budget is used up.`;$('#pv-metrics').innerHTML=privMetrics();if(S.view==='overview')renderOverview()}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(!$('#demo-menu').hidden||!$('#bell-pop').hidden){closePops();return}if(S.drawer)closeDrawer()}
+  const t=e.target;
+  if((e.key==='Enter'||e.key===' ')&&t.matches&&t.matches('g[data-act],tr[data-act]')){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}))}
+  if(e.key==='Tab'&&S.drawer){const f=$$('#drawer button:not([disabled]),#drawer input,#drawer summary,#drawer [tabindex="-1"]').filter(x=>x.offsetParent!==null);if(!f.length)return;const first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+  if(!$('#demo-menu').hidden&&(e.key==='ArrowDown'||e.key==='ArrowUp')){const items=$$('#demo-menu button');const i=items.indexOf(document.activeElement);e.preventDefault();items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus()}
+});
+
+/* ================= 3D SHOWROOM ================= */
+const H3=(()=>{
+  const api={sync(){},pulse(){},zoom(){},spin(){},setActive(){}};
+  const T=window.THREE;const host=$('#stage');
+  const fail=msg=>{host.innerHTML=`<div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)">${msg}</div>`;return api};
+  if(!T)return fail('The 3D house couldn\'t load. Your devices and connections are in Devices &amp; Connections.');
+  let R;try{R=new T.WebGLRenderer({antialias:true,alpha:true})}catch(e){return fail('This browser can\'t show the 3D house. Use Devices &amp; Connections for the map.')}
+  R.setPixelRatio(Math.min(devicePixelRatio||1,2));R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.setClearColor(0,0);
+  R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+  host.appendChild(R.domElement);R.domElement.setAttribute('aria-hidden','true');
+  const scene=new T.Scene();
+  const cam=new T.PerspectiveCamera(30,1,.1,300);
+  const lin=h=>new T.Color(h).convertSRGBToLinear();
+  const C={teal:0x4FD6C4,red:0xF47168,amber:0xF5BB55,grey:0x8a97a8};
+
+  // studio environment for reflections
+  {const pm=new T.PMREMGenerator(R);const es=new T.Scene();
+   es.add(new T.Mesh(new T.BoxGeometry(60,30,60),new T.MeshBasicMaterial({color:lin('#4a5a6c'),side:T.BackSide})));
+   const panel=(w,h,x,y,z,rx,ry,k)=>{const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({color:new T.Color(k,k,k*1.04),side:T.DoubleSide}));m.position.set(x,y,z);m.rotation.set(rx,ry,0);es.add(m)};
+   panel(24,10,0,14,0,Math.PI/2,0,3.2);panel(16,7,-28,7,4,0,Math.PI/2,1.6);panel(16,7,28,8,-4,0,-Math.PI/2,1.1);panel(20,5,0,5,-28,0,0,.8);panel(20,4,0,4,28,0,Math.PI,.9);
+   scene.environment=pm.fromScene(es,.04).texture;}
+
+  // lights
+  scene.add(new T.HemisphereLight(0xe2ebf6,0x26313d,.55));
+  const key=new T.DirectionalLight(0xffffff,1.7);key.position.set(-9,16,11);key.castShadow=true;
+  key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-12,right:12,top:12,bottom:-12,near:1,far:50});key.shadow.bias=-.0004;key.shadow.normalBias=.03;key.shadow.radius=4;scene.add(key);
+  const fill=new T.DirectionalLight(0xbcd2ff,.45);fill.position.set(12,7,-8);scene.add(fill);
+
+  const world=new T.Group();scene.add(world);
+  // textures
+  const canvasTex=(w,h,draw,rep)=>{const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.anisotropy=8;if(rep){t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rep[0],rep[1])}return t};
+  const slats=(base,dark,vertical)=>canvasTex(256,256,(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<16;i++){const p=i*16;g.fillStyle=`rgba(0,0,0,${.18+Math.random()*.12})`;vertical?g.fillRect(p,0,2,h):g.fillRect(0,p,w,2);g.fillStyle=`rgba(255,255,255,${Math.random()*.06})`;vertical?g.fillRect(p+3,0,12,h):g.fillRect(0,p+3,w,12)}g.fillStyle=dark;},[1,1]);
+  const floorAlpha=canvasTex(512,512,(g,w,h)=>{const gr=g.createRadialGradient(256,256,0,256,256,256);gr.addColorStop(0,'#fff');gr.addColorStop(.45,'#ddd');gr.addColorStop(.8,'#333');gr.addColorStop(1,'#000');g.fillStyle=gr;g.fillRect(0,0,w,h)});
+  floorAlpha.encoding=T.LinearEncoding;
+  const glow=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.22,'rgba(255,255,255,.6)');gr.addColorStop(.55,'rgba(255,255,255,.14)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);return new T.CanvasTexture(c)})();
+
+  // studio floor + dashed 360 ring
+  const floor=new T.Mesh(new T.CircleGeometry(30,96),new T.MeshStandardMaterial({color:lin('#5a6b7d'),roughness:.42,metalness:.25,transparent:true,alphaMap:floorAlpha,depthWrite:false}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;world.add(floor);
+  const dashN=200;const dashes=new T.InstancedMesh(new T.BoxGeometry(.28,.01,.05),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75,toneMapped:false}),dashN);
+  {const o=new T.Object3D(),col=new T.Color();for(let i=0;i<dashN;i++){const a=i/dashN*Math.PI*2;o.position.set(Math.cos(a)*9.4,.02,Math.sin(a)*9.4);o.rotation.y=-a+Math.PI/2;o.updateMatrix();dashes.setMatrixAt(i,o.matrix);const f=.35+.65*Math.pow((Math.sin(a)+1)/2,1.5);col.setRGB(f,f,f);dashes.setColorAt(i,col)}}
+  world.add(dashes);
+  const ring=new T.Mesh(new T.RingGeometry(10.6,10.64,160),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.22,side:T.DoubleSide,toneMapped:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.02;world.add(ring);
+
+  // ----- house -----
+  const H=new T.Group();world.add(H);
+  const mats=[];
+  const mat=(hex,o={})=>{const m=new T.MeshStandardMaterial(Object.assign({color:lin(hex),roughness:.75,metalness:0},o));m.transparent=true;m.userData.base=o.opacity==null?1:o.opacity;mats.push(m);return m};
+  const white=mat('#eceef0',{roughness:.82}),concrete=mat('#a9aeb4',{roughness:.95}),charcoal=mat('#2b2f35',{roughness:.55}),frameM=mat('#17191d',{roughness:.35,metalness:.7});
+  const oak=mat('#c9a47c',{roughness:.6}),oakDark=mat('#7a5638',{roughness:.6}),clad=mat('#ffffff',{map:slats('#6e4b31','#3a2416',true),roughness:.7}),deckM=mat('#ffffff',{map:slats('#8d6a4b','#4a3322',false),roughness:.7});
+  const sofaM=mat('#5f6a76',{roughness:.95}),rugM=mat('#b8ad9d',{roughness:1}),plantM=mat('#3e6d4c',{roughness:.9,flatShading:true}),potM=mat('#dcd6cd',{roughness:.8}),doorM=mat('#2e2118',{roughness:.45});
+  const trunkM=mat('#5a4332',{roughness:.9});
+  const warm=mat('#fff3df',{emissive:lin('#ffc98a'),emissiveIntensity:1.6});
+  const tvM=mat('#0e1626',{emissive:lin('#2d5ca8'),emissiveIntensity:.9,roughness:.25});
+  const scrM=mat('#0e1626',{emissive:lin('#4b84d6'),emissiveIntensity:1,roughness:.3});
+  const glassM=new T.MeshPhysicalMaterial({color:lin('#a7bccf'),roughness:.04,metalness:.05,transparent:true,opacity:.26,envMapIntensity:1.8,clearcoat:1,depthWrite:false});glassM.userData.base=.26;glassM.userData.glass=true;mats.push(glassM);
+  const B=(w,h,d,x,y,z,m,parent=H,shadow=true)=>{const b=new T.Mesh(new T.BoxGeometry(w,h,d),m);b.position.set(x,y,z);b.castShadow=shadow;b.receiveShadow=true;parent.add(b);return b};
+  const roofA=new T.Group(),roofB=new T.Group(),frontA=new T.Group(),frontB=new T.Group();H.add(roofA,roofB,frontA,frontB);
+  // plinth + deck + path
+  B(11.6,.3,7.6,0,.15,0,concrete);
+  B(5.6,.12,1.9,-2.4,.24,4.75,deckM);B(1.8,.12,.55,-2.0,.08,5.95,deckM);
+  for(let i=0;i<3;i++)B(1,.05,.65,1.3,.03,4.2+i*.85,concrete);
+  // living (A)
+  B(5.6,.04,6.8,-2.4,.32,0,oak);
+  B(5.6,3,.2,-2.4,1.8,-3.3,white);B(.2,3,6.8,-5.1,1.8,0,white);
+  B(5.4,2.9,.04,-2.4,1.78,3.38,glassM,frontA,false);
+  [-5.05,-3.25,-1.45,.35].forEach(x=>B(.07,3,.09,x,1.8,3.38,frameM,frontA));B(5.6,.08,.09,-2.4,3.26,3.38,frameM,frontA);B(5.6,.08,.09,-2.4,.34,3.38,frameM,frontA);
+  B(6.5,.26,7.8,-2.55,3.43,.25,white,roofA);B(6.52,.07,7.82,-2.55,3.28,.25,charcoal,roofA);
+  {const p=B(1.4,.03,1.4,-2.4,3.27,.2,warm,roofA,false);}
+  // block B: hall + study
+  B(4.8,.04,5.8,2.8,.32,-.5,oak);
+  B(4.8,3.8,.2,2.8,2.2,-3.3,white);B(.2,3.8,5.8,5.1,2.2,-.5,clad);
+  B(.2,3.8,2.4,.4,2.2,-2.2,white);B(.2,3.8,2.4,.4,2.2,1.2,white);B(.2,1.3,1.0,.4,3.45,-.5,white);
+  B(1.8,3.8,.2,1.3,2.2,2.3,clad);B(1.0,2.3,.07,1.3,1.45,2.42,doorM);B(.04,.45,.06,1.68,1.45,2.48,frameM);
+  B(2.85,3.6,.04,3.65,2.2,2.38,glassM,frontB,false);
+  [2.25,3.65,5.05].forEach(x=>B(.07,3.8,.09,x,2.2,2.38,frameM,frontB));B(2.9,.08,.09,3.65,4.08,2.38,frameM,frontB);B(2.9,.08,.09,3.65,.34,2.38,frameM,frontB);
+  B(.1,3.8,4,2.2,2.2,-1.4,white);
+  B(5.5,.3,6.7,2.8,4.25,-.4,charcoal,roofB);B(5.52,.06,6.72,2.8,4.08,-.4,white,roofB);
+  B(.9,.03,.9,1.3,4.06,-1.2,warm,roofB,false);B(1.2,.03,1.2,3.7,4.06,-1.2,warm,roofB,false);
+  // outdoor lamps
+  B(.12,.3,.1,.72,2.7,2.47,warm,H,false);B(.12,.3,.1,1.88,2.7,2.47,warm,H,false);
+  // interior: living
+  B(3,.02,2.2,-2.4,.35,.7,rugM);B(2.6,.4,.9,-2.4,.54,1.95,sofaM);B(2.6,.55,.22,-2.4,.95,2.38,sofaM);B(.22,.55,.9,-3.6,.7,1.95,sofaM);B(.22,.55,.9,-1.2,.7,1.95,sofaM);
+  B(1.2,.07,.6,-2.4,.66,.55,oakDark);B(1.0,.3,.45,-2.4,.48,.55,charcoal);
+  B(2.4,.45,.4,-2.4,.56,-3.0,charcoal);B(1.8,1,.05,-2.4,1.75,-3.17,tvM,H,false);
+  B(.42,.5,.42,-4.55,.58,2.6,potM);{const p=new T.Mesh(new T.IcosahedronGeometry(.48,1),plantM);p.position.set(-4.55,1.25,2.6);p.castShadow=true;H.add(p)}
+  B(.06,1.5,.06,-.6,1.07,2.6,frameM);B(.45,.32,.45,-.6,1.85,2.6,warm,H,false);
+  // hall
+  B(1.2,.8,.36,1.3,.72,-3.0,oakDark);B(.5,.6,.04,1.3,2.2,-3.18,frameM);
+  // study
+  B(1.8,.06,.8,3.65,1.08,-2.55,oak);[[-.82,-.33],[.82,-.33],[-.82,.33],[.82,.33]].forEach(([a,b])=>B(.06,.74,.06,3.65+a,.7,-2.55+b,frameM));
+  B(.55,.55,.55,3.65,.62,-1.75,charcoal);B(.55,.04,.38,3.5,1.13,-2.6,frameM);{const s=B(.55,.36,.03,3.5,1.32,-2.78,scrM,H,false);s.rotation.x=-.18}
+  B(.42,2.6,1.5,4.78,1.62,-2.2,oakDark);['#9b4d3a','#d8c49a','#3d5a7a','#6e8a5a','#c0b6a8'].forEach((c,i)=>B(.3,.5,.18,4.72,2.25-(i%2)*.75,-2.75+i*.25,mat(c),H,false));
+  B(.08,1.4,.08,4.6,1.03,1.5,frameM);{const sh=new T.Mesh(new T.CylinderGeometry(.18,.3,.36,20,1,true),warm);sh.position.set(4.6,1.8,1.5);H.add(sh)}
+  // landscaping
+  {const tr=new T.Mesh(new T.CylinderGeometry(.11,.16,2.6,10),trunkM);tr.position.set(-7.1,1.3,-1.8);tr.castShadow=true;H.add(tr);
+   [[1.35,-7.1,3.0,-1.8],[1.0,-6.6,3.9,-1.4],[.9,-7.6,3.7,-2.3]].forEach(([r,x,y,z])=>{const c=new T.Mesh(new T.IcosahedronGeometry(r,1),plantM);c.position.set(x,y,z);c.castShadow=true;H.add(c)})}
+  [[3.4,.42,3.15,.45],[4.4,.36,3.1,.38],[5.6,.5,1.8,.5],[-5.9,.4,3.2,.4]].forEach(([x,y,z,r])=>{const s=new T.Mesh(new T.IcosahedronGeometry(r,1),plantM);s.position.set(x,y,z);s.castShadow=true;H.add(s)});
+  // interior warm lights
+  const pl=(x,y,z,i,d)=>{const l=new T.PointLight(0xffc98a,i,d,2);l.position.set(x,y,z);H.add(l);return l};
+  const livingL=pl(-2.4,2.7,.4,2.2,9);pl(1.3,3.3,-1,1.0,6);pl(3.7,3.3,-1,1.4,7);
+  const bulbCone=new T.Mesh(new T.ConeGeometry(1.8,2.6,32,1,true),new T.MeshBasicMaterial({color:0xffd59a,transparent:true,opacity:.05,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending}));bulbCone.position.set(-2.4,1.85,.2);H.add(bulbCone);
+
+  // ----- device nodes -----
+  const POS={cam:[-4.85,2.95,-3.0],light:[-2.4,3.05,.2],motion:[.72,3.85,-3.0],hub:[1.3,1.38,-2.95],laptop:[3.5,1.62,-2.7],plug:[4.88,.75,1.25],net:[9.6,4.6,-4.2]};
+  const nodes={},hits=[];
+  Object.keys(POS).forEach(id=>{
+    const g=new T.Group();g.position.set(...POS[id]);const isNet=id==='net';
+    const core=new T.Mesh(isNet?new T.IcosahedronGeometry(.6,1):new T.SphereGeometry(.13,24,16),new T.MeshBasicMaterial({color:C.teal,wireframe:isNet,toneMapped:false}));
+    const halo=new T.Sprite(new T.SpriteMaterial({map:glow,color:C.teal,transparent:true,opacity:.9,depthWrite:false,depthTest:false,blending:T.AdditiveBlending}));halo.scale.setScalar(isNet?3:1);halo.renderOrder=10;
+    const ping=new T.Mesh(new T.RingGeometry(.22,.26,48),new T.MeshBasicMaterial({color:C.teal,transparent:true,opacity:0,side:T.DoubleSide,depthWrite:false,depthTest:false,toneMapped:false}));ping.renderOrder=11;
+    const cage=new T.Mesh(new T.TorusGeometry(.4,.022,8,40),new T.MeshBasicMaterial({color:C.red,toneMapped:false}));cage.visible=false;const c2=cage.clone();c2.rotation.x=Math.PI/2;cage.add(c2);
+    const hit=new T.Mesh(new T.SphereGeometry(isNet?.9:.5,10,8),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.userData.id=id;if(!isNet)hits.push(hit);
+    g.add(core,halo,ping,cage,hit);world.add(g);nodes[id]={g,core,halo,ping,cage,isNet,phase:Math.random()*6,tone:'teal'};
+  });
+  const labelsEl=$('#labels');
+  Object.keys(POS).forEach(id=>{const b=document.createElement(id==='net'?'div':'button');b.className='nl';b.dataset.nid=id;if(id!=='net'){b.dataset.act='open-device';b.dataset.id=id}else b.style.pointerEvents='none';labelsEl.appendChild(b)});
+
+  // ----- arcs -----
+  let arcs=[];const arcGroup=new T.Group();world.add(arcGroup);
+  const curveFor=c=>{const a=new T.Vector3(...POS[c.from]),b=new T.Vector3(...POS[c.to]);const m=a.clone().lerp(b,.5);m.y+=1.3+a.distanceTo(b)*.22;return new T.QuadraticBezierCurve3(a,m,b)};
+  const spr=(color,size,op)=>{const s=new T.Sprite(new T.SpriteMaterial({map:glow,color,transparent:true,opacity:op==null?1:op,depthWrite:false,depthTest:false,blending:T.AdditiveBlending}));s.scale.setScalar(size);s.renderOrder=12;return s};
+  const dispose=o=>o.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});
+  function buildArcs(){
+    arcs.forEach(a=>{arcGroup.remove(a.g);dispose(a.g)});arcs=[];
+    const off=offline();const pk=privacyState().key;const cover=(pk==='active'||pk==='degraded')&&!off;
+    S.conns.forEach(c=>{
+      const g=new T.Group();const curve=curveFor(c);const tone=off?'grey':connTone(c);const col=C[tone];const a={c,g,curve,parts:[],mats:[]};
+      const reg=m=>{m.userData.base=m.opacity;a.mats.push(m);return m};
+      const lineMat=(o)=>reg(new T.MeshBasicMaterial({color:col,transparent:true,opacity:o,depthWrite:false,depthTest:false,toneMapped:false,blending:T.AdditiveBlending}));
+      if(c.status==='allowed'){
+        const m=new T.Mesh(new T.TubeGeometry(curve,64,.02,6,false),lineMat(off?.2:.6));m.renderOrder=9;g.add(m);
+        if(!off)for(let i=0;i<3;i++){const p=spr(col,.45);p.userData.off=i/3;g.add(p);a.parts.push(p)}
+        if(cover&&c.to==='net')for(let i=0;i<6;i++){const p=spr(0xdfeeff,.28,.5);p.userData.off=i/6;p.userData.cover=true;g.add(p);a.parts.push(p)}
+      } else if(c.status==='blocked'){
+        const pts=[];for(let i=0;i<=24;i++)pts.push(curve.getPoint(i/24*.5));
+        const m=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts),30,.024,6,false),lineMat(.85));m.renderOrder=9;g.add(m);
+        const dots=[];for(let i=0;i<=12;i++)dots.push(curve.getPoint(.55+i/12*.45));
+        const pm=reg(new T.PointsMaterial({color:col,size:.13,map:glow,transparent:true,opacity:.35,depthWrite:false,depthTest:false}));const pts2=new T.Points(new T.BufferGeometry().setFromPoints(dots),pm);pts2.renderOrder=9;g.add(pts2);
+        const sh=new T.Group();sh.position.copy(curve.getPoint(.5));
+        const hex=new T.Mesh(new T.RingGeometry(.24,.31,6),reg(new T.MeshBasicMaterial({color:col,transparent:true,opacity:.95,side:T.DoubleSide,depthWrite:false,depthTest:false,toneMapped:false})));
+        const fillm=new T.Mesh(new T.CircleGeometry(.24,6),reg(new T.MeshBasicMaterial({color:col,transparent:true,opacity:.22,side:T.DoubleSide,depthWrite:false,depthTest:false,toneMapped:false})));
+        hex.renderOrder=fillm.renderOrder=13;const flash=spr(col,1.3,0);sh.add(hex,fillm,flash);g.add(sh);a.shield=sh;a.flash=flash;
+        if(!off)for(let i=0;i<2;i++){const p=spr(col,.45);p.userData.off=i/2;g.add(p);a.parts.push(p)}
+      } else {
+        const dots=[];for(let i=0;i<=22;i++)dots.push(curve.getPoint(i/22));
+        a.dotMat=reg(new T.PointsMaterial({color:col,size:.15,map:glow,transparent:true,opacity:.75,depthWrite:false,depthTest:false,blending:T.AdditiveBlending}));const p2=new T.Points(new T.BufferGeometry().setFromPoints(dots),a.dotMat);p2.renderOrder=9;g.add(p2);
+        if(!off){const p=spr(col,.4);p.userData.off=0;g.add(p);a.parts.push(p)}
+      }
+      arcGroup.add(g);arcs.push(a);
+    });
+  }
+  // mode state
+  let ghost=0,lift=0,front=1,arcK=.6;
+  const modeTargets=()=>({exterior:{g:0,l:0,f:1,a:.55},interior:{g:0,l:1,f:0,a:.8},network:{g:1,l:0,f:1,a:1},threats:{g:1,l:0,f:1,a:1}})[S.mode];
+  let sig='';
+  api.sync=function(){
+    const s=JSON.stringify([S.conns.map(c=>c.status+c.source),S.scenario,privacyState().key]);if(s!==sig){sig=s;buildArcs()}
+    const focus=S.drawer&&S.drawer.type==='device'?S.drawer.id:null;const fconn=S.drawer&&S.drawer.type==='conn'?conn(S.drawer.id):null;
+    arcs.forEach(a=>{a.g.visible=S.mode!=='threats'||a.c.status!=='allowed';a.rel=(!focus&&!fconn)||(focus&&(a.c.from===focus||a.c.to===focus))||(fconn&&fconn.id===a.c.id)});
+    Object.keys(nodes).forEach(id=>{const n=nodes[id];let tone=offline()?'grey':id==='net'?'teal':devState(dev(id)).tone;
+      n.core.material.color.setHex(C[tone]);n.halo.material.color.setHex(C[tone]);n.ping.material.color.setHex(C[tone]);n.tone=tone;
+      n.cage.visible=id!=='net'&&!!dev(id).isolated&&!offline();
+      n.rel=(!focus&&!fconn)||id===focus||(fconn&&(fconn.from===id||fconn.to===id));n.focus=id===focus;
+      const el=labelsEl.querySelector(`[data-nid="${id}"]`);
+      if(id==='net')el.innerHTML=`<span class="d ${tone}"></span>Internet`;
+      else{const d=dev(id),st=devState(d);el.innerHTML=`<span class="d ${st.tone}"></span>${esc(d.name)}${st.tone==='teal'?'':`<span class="s">${esc(st.text)}</span>`}`;el.setAttribute('aria-label',`${d.name}, ${st.text}. Open details`)}
+      const quiet=(S.mode==='exterior'||S.mode==='threats')&&tone==='teal'&&!n.focus;
+      el.classList.toggle('hide',quiet);el.classList.toggle('dim',!n.rel);
+    });
+    R.domElement.style.filter=offline()?'saturate(.3) brightness(.85)':'';
+  };
+  let pulseAt=-1;api.pulse=()=>{pulseAt=performance.now()/1000};
+  const target=new T.Vector3(.2,1.5,.2);
+  let theta=.62,phi=1.36,radius=21,tTheta=theta,tPhi=phi,tRadius=21,baseR=21,auto=true,lastUser=-1e9,active=true;
+  api.zoom=k=>{if(k==='in')tRadius=Math.max(baseR*.55,tRadius-3);else if(k==='out')tRadius=Math.min(baseR*1.5,tRadius+3);else{tRadius=baseR;tTheta=.62;tPhi=1.36;auto=true;return}auto=false;lastUser=performance.now()};
+  api.spin=d=>{tTheta+=d*Math.PI/4;auto=false;lastUser=performance.now()};
+  api.setActive=a=>{active=a;if(a){resize();loop()}};
+
+  let drag=null;
+  R.domElement.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,moved:0};R.domElement.setPointerCapture(e.pointerId)});
+  R.domElement.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.moved+=Math.abs(dx)+Math.abs(dy);drag.x=e.clientX;drag.y=e.clientY;if(drag.moved>4){tTheta-=dx*.006;tPhi=Math.min(1.42,Math.max(.6,tPhi-dy*.004));auto=false;lastUser=performance.now()}});
+  R.domElement.addEventListener('pointerup',e=>{if(drag&&drag.moved<=4){const r=R.domElement.getBoundingClientRect();const m=new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);const rc=new T.Raycaster();rc.setFromCamera(m,cam);const h=rc.intersectObjects(hits,false)[0];if(h)openDrawer('device',h.object.userData.id)}drag=null});
+
+  let W=1,Hh=1;
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;W=w;Hh=h;R.setSize(w,h,false);cam.aspect=w/h;
+    const nb=w<640?29:w<1000?24:21;if(nb!==baseR){tRadius*=nb/baseR;baseR=nb}
+    // shift the frame so the house sits between the title and the cards
+    const cardsH=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cards-h'))||220;
+    const shift=w<760?-h*.1:Math.min(40,(cardsH-200)*.3);cam.setViewOffset(w,h,0,shift,w,h);cam.updateProjectionMatrix()}
+  new ResizeObserver(resize).observe(host);resize();
+  window.addEventListener('resize',resize);
+
+  const t0=performance.now()/1000;const introDur=reduced()?0:2.8;
+  if(introDur){radius=60;phi=1.1;theta=-.5}
+  const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3);
+  const v=new T.Vector3();let prev=performance.now()/1000,raf=0;
+  function loop(){cancelAnimationFrame(raf);raf=requestAnimationFrame(frame)}
+  function frame(){
+    if(!active||document.hidden)return;raf=requestAnimationFrame(frame);
+    const now=performance.now()/1000,dt=Math.min(.05,now-prev);prev=now;const rm=reduced();const tt=rm?0:now;
+    const it=(now-t0)/(introDur||1);
+    if(introDur&&it<1){const k=ease(it);radius=60+(tRadius-60)*k;phi=1.1+(tPhi-1.1)*k;theta=-.5+(tTheta+.5)*k;H.position.y=-(1-k)*.0}
+    else{if(!rm&&auto)tTheta+=dt*.06;if(!auto&&performance.now()-lastUser>9000&&!rm)auto=true;theta+=(tTheta-theta)*.07;phi+=(tPhi-phi)*.07;radius+=(tRadius-radius)*.07}
+    cam.position.set(target.x+radius*Math.sin(phi)*Math.sin(theta),target.y+radius*Math.cos(phi),target.z+radius*Math.sin(phi)*Math.cos(theta));cam.lookAt(target);
+    // mode easing
+    const mt=modeTargets();const k=rm?1:.08;ghost+=(mt.g-ghost)*k;lift+=(mt.l-lift)*k;front+=(mt.f-front)*k;arcK+=(mt.a-arcK)*k;
+    mats.forEach(m=>{const g=m.userData.glass?ghost*.75:ghost*.86;m.opacity=m.userData.base*(1-g);m.depthWrite=!m.userData.glass&&ghost<.05});
+    roofA.position.y=lift*1.9;roofB.position.y=lift*2.1;roofA.position.z=roofB.position.z=-lift*2.2;
+    frontA.visible=frontB.visible=front>.02;frontA.children.concat(frontB.children).forEach(o=>{o.scale.y=Math.max(.02,front);o.position.y=o.userData.y0==null?(o.userData.y0=o.position.y):o.userData.y0;});
+    // nodes
+    Object.values(nodes).forEach(n=>{
+      n.ping.quaternion.copy(cam.quaternion);if(n.isNet){n.core.rotation.y=tt*.3;n.core.rotation.x=tt*.17}
+      const urgent=n.tone==='red'||n.tone==='amber';
+      if(urgent&&!rm){const p=((tt+n.phase)%1.6)/1.6;n.ping.scale.setScalar(1+p*3.4);n.ping.material.opacity=(1-p)*.85}else n.ping.material.opacity=0;
+      n.halo.scale.setScalar((n.isNet?3:1)*(n.focus?1.5:1)*(1+(rm?0:.1*Math.sin(tt*2.2+n.phase))));
+      n.halo.material.opacity=(n.rel?.9:.25)*(S.mode==='exterior'?.55:1);
+      if(n.cage.visible){n.cage.rotation.y=tt*1.4;n.cage.rotation.z=tt*.6}
+    });
+    // arcs
+    const pt=pulseAt>0?now-pulseAt:99;
+    arcs.forEach(a=>{
+      const st=a.c.status,f=arcK*(a.rel?1:.15);a.mats.forEach(m=>{if(m!==a.dotMat)m.opacity=m.userData.base*f});
+      a.parts.forEach(p=>{let u;
+        if(st==='allowed'){const sp=p.userData.cover?.16:(.22+(pt<3&&['c3','c4','c1'].includes(a.c.id)?.6:0));u=rm?p.userData.off:(tt*sp+p.userData.off)%1;p.position.copy(a.curve.getPoint(u));p.material.opacity=(p.userData.cover?.5:Math.sin(u*Math.PI))*f}
+        else if(st==='blocked'){u=rm?.3:((tt*.33+p.userData.off)%1);if(u<.5){p.visible=true;p.position.copy(a.curve.getPoint(u));p.material.opacity=Math.min(1,u*6)*f}else p.visible=false}
+        else{u=rm?.25:((tt*.1)%1)*.5;p.position.copy(a.curve.getPoint(u));p.material.opacity=(1-u*1.6)*f}});
+      if(a.shield){a.shield.quaternion.copy(cam.quaternion);let fl=0;if(!rm)a.parts.forEach(p=>{const u=((tt*.33+p.userData.off)%1);fl=Math.max(fl,1-Math.abs(u-.5)*14)});a.flash.material.opacity=Math.max(0,fl)*.9*f;a.shield.scale.setScalar(1+Math.max(0,fl)*.35)}
+      if(a.dotMat)a.dotMat.opacity=(rm?.6:.4+.35*Math.sin(tt*2.4))*f;
+    });
+    const lp=pt<4?Math.max(0,Math.sin(Math.min(1,(pt-.9)/.5)*Math.PI/2))*(1-Math.max(0,(pt-3))):0;
+    livingL.intensity=offline()?.6:2.2+lp*4;bulbCone.material.opacity=offline()?.01:.05+lp*.18;
+    // labels
+    labelsEl.querySelectorAll('.nl').forEach(el=>{const n=nodes[el.dataset.nid];n.g.getWorldPosition(v);v.y+=n.isNet?1.1:.38;v.project(cam);
+      const x=(v.x*.5+.5)*W,y=(-v.y*.5+.5)*Hh;el.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%)`;el.style.visibility=v.z<1?'visible':'hidden'});
+    R.render(scene,cam);
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&active){prev=performance.now()/1000;loop()}});
+  loop();
+  return api;
+})();
+
+render();
+setTimeout(()=>{S.loading=false;render()},1100);
+})();
+</script>
